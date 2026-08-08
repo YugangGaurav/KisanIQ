@@ -1,0 +1,8173 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>KisanIQ</title>
+<style>
+:root{--g:#3F8F5B;--lg:#E8F5D8;--vlg:#F3F8E9;--sky:#65C5E8;--lb:#DDF4FA;--cream:#FFF9E8;--yel:#F5C84B;--brown:#8B6848;--dt:#17301F;--st:#66756A;--ok:#42A866;--warn:#F2A93B;--bad:#E85D5D;--purp:#7B6EE8;--r:24px;--sh:0 4px 20px rgba(63,143,91,.08);--shh:0 8px 30px rgba(63,143,91,.14)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--vlg);color:var(--dt);max-width:430px;margin:0 auto;min-height:100vh;overflow-x:hidden;padding-bottom:80px;-webkit-tap-highlight-color:transparent}
+
+/* === UNIFIED PAGE SYSTEM (single radio group fixes dual-display bug) === */
+input[name="pg"]{display:none}
+.pg{display:none;padding-bottom:20px}
+#p-home:checked~.app .pg-home,
+#p-weather:checked~.app .pg-weather,
+#p-crop:checked~.app .pg-crop,
+#p-irrigation:checked~.app .pg-irrigation,
+#p-fertilizer:checked~.app .pg-fertilizer,
+#p-mandi:checked~.app .pg-mandi,
+#p-farm:checked~.app .pg-farm,
+#p-history:checked~.app .pg-history,
+#p-voice:checked~.app .pg-voice,
+#p-voice:checked~.pg-voice {
+    display: block !important;
+}
+#p-assistant:checked~.app .pg-assistant,
+#p-alerts:checked~.app .pg-alerts,
+#p-iot:checked~.app .pg-iot,
+#p-admin:checked~.app .pg-admin,
+#p-more:checked~.app .pg-more{display:block}
+
+/* IoT demo state radios */
+input[name="iot"]{display:none}
+/* Voice state radios */
+input[name="vst"]{display:none}
+/* Crop scan state */
+input[name="scan"]{display:none}
+
+/* === ANIMATIONS === */
+@media(prefers-reduced-motion:no-preference){
+@keyframes fi{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@keyframes pu{0%,100%{transform:scale(1)}50%{transform:scale(1.05);opacity:.7}}
+@keyframes br{0%,100%{box-shadow:0 0 0 0 rgba(63,143,91,.3)}50%{box-shadow:0 0 0 12px rgba(63,143,91,0)}}
+@keyframes ga{from{stroke-dashoffset:264}}
+@keyframes scan{0%{top:0}100%{top:calc(100% - 3px)}}
+@keyframes dots{0%,20%{opacity:.2}50%{opacity:1}80%,100%{opacity:.2}}
+@keyframes ring{0%{transform:scale(.8);opacity:1}100%{transform:scale(1.6);opacity:0}}
+.an{animation:fi .4s ease-out both}
+.d1{animation-delay:.06s}.d2{animation-delay:.12s}.d3{animation-delay:.18s}.d4{animation-delay:.24s}.d5{animation-delay:.3s}.d6{animation-delay:.36s}
+}
+.an{opacity:1}
+
+/* === BOTTOM NAV (fixed, always visible, correct active states) === */
+.bnav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:#fff;border-radius:20px 20px 0 0;box-shadow:0 -3px 20px rgba(0,0,0,.05);display:flex;justify-content:space-around;align-items:center;padding:6px 4px 10px;z-index:100}
+.bnav label{display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 14px;border-radius:14px;cursor:pointer;transition:all .25s ease;min-width:52px}
+.bnav label:active{transform:scale(.88)}
+.bnav .ni{font-size:22px;transition:transform .2s ease}
+.bnav .nl{font-size:9px;font-weight:600;color:var(--st);transition:color .2s}
+/* Active nav states */
+#p-home:checked~.app .bnav .nh,
+#p-crop:checked~.app .bnav .nc,
+#p-farm:checked~.app .bnav .nf,#p-irrigation:checked~.app .bnav .nf,#p-iot:checked~.app .bnav .nf,
+#p-mandi:checked~.app .bnav .nm,
+#p-more:checked~.app .bnav .nmo,#p-weather:checked~.app .bnav .nmo,#p-fertilizer:checked~.app .bnav .nmo,#p-history:checked~.app .bnav .nmo,#p-voice:checked~.app .bnav .nmo,#p-assistant:checked~.app .bnav .nmo,#p-alerts:checked~.app .bnav .nmo,#p-admin:checked~.app .bnav .nmo{background:var(--lg)}
+#p-home:checked~.app .bnav .nh .nl,
+#p-crop:checked~.app .bnav .nc .nl,
+#p-farm:checked~.app .bnav .nf .nl,#p-irrigation:checked~.app .bnav .nf .nl,#p-iot:checked~.app .bnav .nf .nl,
+#p-mandi:checked~.app .bnav .nm .nl,
+#p-more:checked~.app .bnav .nmo .nl,#p-weather:checked~.app .bnav .nmo .nl,#p-fertilizer:checked~.app .bnav .nmo .nl,#p-history:checked~.app .bnav .nmo .nl,#p-voice:checked~.app .bnav .nmo .nl,#p-assistant:checked~.app .bnav .nmo .nl,#p-alerts:checked~.app .bnav .nmo .nl,#p-admin:checked~.app .bnav .nmo .nl{color:var(--g);font-weight:700}
+
+/* === COMMON COMPONENTS === */
+.hdr{padding:16px 16px 0;display:flex;align-items:center;justify-content:space-between}
+.hdr-l{display:flex;align-items:center;gap:10px}
+.av{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--g),var(--ok));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:14px;flex-shrink:0}
+.grt{font-size:12px;color:var(--st)}.grn{font-size:17px;font-weight:700}
+.ibtn{width:38px;height:38px;border-radius:50%;background:#fff;border:none;display:flex;align-items:center;justify-content:center;box-shadow:var(--sh);cursor:pointer;font-size:15px;transition:transform .15s ease}
+.ibtn:active{transform:scale(.85)}
+.sbar{padding:6px 16px;display:flex;align-items:center;gap:6px;font-size:11px;color:var(--ok);font-weight:500}
+.sdot{width:7px;height:7px;border-radius:50%;background:var(--ok);animation:br 2.5s infinite}
+.sec{padding:20px 16px 10px;font-size:16px;font-weight:700}
+.phdr{padding:14px 16px;display:flex;align-items:center;gap:12px;position:sticky;top:0;background:var(--vlg);z-index:10}
+.bbtn{width:36px;height:36px;border-radius:50%;background:#fff;border:none;box-shadow:var(--sh);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px;transition:transform .15s;flex-shrink:0}
+.bbtn:active{transform:scale(.85)}
+.ptit{font-size:17px;font-weight:700}
+
+/* === WEATHER HERO === */
+.wh{margin:10px 16px;background:linear-gradient(135deg,#4DA8E8,var(--sky),#8DD8F0);border-radius:var(--r);padding:22px 18px;color:#fff;position:relative;overflow:hidden;box-shadow:0 8px 28px rgba(101,197,232,.25);cursor:pointer;transition:transform .2s}
+.wh:active{transform:scale(.97)}
+.wh::before{content:'';position:absolute;top:-30px;right:-30px;width:100px;height:100px;background:rgba(255,255,255,.1);border-radius:50%}
+.wh-icon{position:absolute;top:14px;right:16px;font-size:38px;opacity:.85}
+.wloc{font-size:11px;opacity:.9}.wtp{font-size:44px;font-weight:800;line-height:1.1;margin:4px 0}
+.wds{font-size:14px;font-weight:600;margin-bottom:8px}
+.wadv{background:rgba(255,255,255,.18);border-radius:10px;padding:8px 12px;font-size:11px;font-weight:600;max-width:75%}
+.wmt{display:flex;gap:12px;margin-top:10px;font-size:10px;opacity:.9;flex-wrap:wrap}
+
+/* === FARM GRID (responsive) === */
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 16px}
+.fc{background:#fff;border-radius:18px;padding:16px 12px;box-shadow:var(--sh);cursor:pointer;text-align:center;transition:transform .2s,box-shadow .2s;text-decoration:none;color:inherit;display:block}
+.fc:active{transform:scale(.94);box-shadow:var(--shh)}
+.fci{font-size:28px;margin-bottom:5px;display:block}
+.fct{font-size:12px;font-weight:700}.fcd{font-size:10px;color:var(--st);margin-top:2px;line-height:1.3}
+.fc.gt{background:linear-gradient(135deg,#f0faf3,#fff)}
+.fc.bt{background:linear-gradient(135deg,#eef8fd,#fff)}
+.fc.yt{background:linear-gradient(135deg,#fef9e8,#fff)}
+.fc.pt{background:linear-gradient(135deg,#f3f0ff,#fff)}
+.fc.et{background:linear-gradient(135deg,#faf5ef,#fff)}
+
+/* === PLAN CARDS === */
+.plc{margin:6px 16px;background:#fff;border-radius:16px;padding:14px 16px;box-shadow:var(--sh);display:flex;align-items:center;gap:11px;cursor:pointer;transition:transform .2s;text-decoration:none;color:inherit}
+.plc:active{transform:scale(.97)}
+.pli{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.pli.gr{background:var(--lg)}.pli.bl{background:var(--lb)}.pli.yl{background:var(--cream)}.pli.rd{background:#FDEAEA}
+.plcn{flex:1;min-width:0}.plct{font-size:12px;font-weight:700}.plcs{font-size:10px;color:var(--st);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.plb{font-size:9px;font-weight:700;padding:4px 8px;border-radius:12px;white-space:nowrap;flex-shrink:0}
+.plb.ba{background:#FDEAEA;color:var(--bad)}.plb.bi{background:var(--lb);color:#2B8BB5}.plb.bs{background:var(--lg);color:var(--g)}
+
+/* === WEATHER PAGE === */
+.wdc{margin:0 16px 12px;background:linear-gradient(135deg,#4DA8E8,var(--sky));border-radius:var(--r);padding:28px 20px;color:#fff;text-align:center;box-shadow:0 8px 28px rgba(101,197,232,.25)}
+.wdtp{font-size:52px;font-weight:800;line-height:1}.wdds{font-size:15px;margin-top:5px;opacity:.9}.wdlc{font-size:12px;margin-top:3px;opacity:.8}
+.wmg{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;padding:0 16px;margin-bottom:12px}
+.mc{background:#fff;border-radius:14px;padding:12px 8px;text-align:center;box-shadow:var(--sh)}
+.mci{font-size:20px;margin-bottom:3px}.mcv{font-size:14px;font-weight:700}.mcl{font-size:9px;color:var(--st);margin-top:2px}
+.wrc{margin:12px 16px;background:linear-gradient(135deg,#FFF0E0,#FFECD6);border-radius:16px;padding:14px 16px;border-left:4px solid var(--warn)}
+.wrt{font-size:11px;font-weight:700;color:var(--warn);margin-bottom:4px}.wrx{font-size:11px;color:#7A5A2A;line-height:1.5}
+.fcr{display:flex;gap:8px;padding:0 16px 16px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.fcr::after{content:'';min-width:8px;flex-shrink:0}
+.fcr::-webkit-scrollbar{display:none}
+.fcc{min-width:72px;background:#fff;border-radius:14px;padding:10px 8px;text-align:center;box-shadow:var(--sh);flex-shrink:0}
+.fcd2{font-size:9px;color:var(--st);font-weight:600}.fcic{font-size:20px;margin:5px 0}.fctp{font-size:12px;font-weight:700}.fcrn{font-size:9px;color:var(--sky);margin-top:2px}
+
+/* === CROP DOCTOR === */
+.upa{margin:14px 16px;background:#fff;border:2px dashed #c8e6c9;border-radius:var(--r);padding:36px 16px;text-align:center;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
+.upa:active{border-color:var(--g);background:var(--vlg);transform:scale(.97)}
+.upi{font-size:44px;margin-bottom:10px}.upt{font-size:14px;font-weight:700}.ups{font-size:11px;color:var(--st);margin-top:4px}
+/* Scan states */
+#scan-active:checked~.app .pg-crop .scan-idle{display:none}
+#scan-active:checked~.app .pg-crop .scan-result{display:block}
+#scan-idle:checked~.app .pg-crop .scan-idle{display:block}
+#scan-idle:checked~.app .pg-crop .scan-result{display:none}
+.scan-result{display:none}
+.rsc{margin:12px 16px;background:#fff;border-radius:var(--r);padding:20px;box-shadow:var(--sh)}
+.rsh{display:flex;align-items:center;gap:11px;margin-bottom:12px}
+.rsb{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.rsb.rd{background:#FDEAEA}.rsb.gn{background:var(--lg)}
+.rsn{font-size:15px;font-weight:700}.rscf{font-size:11px;color:var(--st)}
+.gcon{display:flex;justify-content:center;margin:14px 0;position:relative}
+.gsvg{width:130px;height:130px}
+.gbg{fill:none;stroke:#eef5e8;stroke-width:10}
+.gfl{fill:none;stroke-width:10;stroke-linecap:round;animation:ga 1s ease-out}
+.gtx{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center}
+.gv{font-size:26px;font-weight:800}.gl{font-size:10px;color:var(--st)}
+
+/* === DETAILS === */
+details{margin:0 16px 8px}
+details summary{background:#fff;border-radius:12px;padding:12px 14px;font-size:11px;font-weight:600;color:var(--g);cursor:pointer;box-shadow:var(--sh);list-style:none;transition:transform .15s}
+details summary:active{transform:scale(.98)}
+details summary::marker,details summary::-webkit-details-marker{display:none}
+details[open] summary{border-radius:12px 12px 0 0}
+details .dc{background:#fff;border-radius:0 0 12px 12px;padding:12px 14px;font-size:11px;color:var(--st);line-height:1.6;box-shadow:var(--sh)}
+
+/* === RECOMMENDATION CARD === */
+.rcrd{margin:12px 16px;background:linear-gradient(135deg,var(--lg),#f0faf3);border-radius:20px;padding:18px;border:1px solid rgba(63,143,91,.1)}
+.rci{font-size:24px;margin-bottom:6px}.rctt{font-size:13px;font-weight:700;color:var(--g);margin-bottom:4px}
+.rctx{font-size:11px;color:var(--dt);line-height:1.6}
+
+/* === CTA === */
+.cta{display:block;margin:16px;padding:14px 18px;background:linear-gradient(135deg,var(--g),var(--ok));color:#fff;border:none;border-radius:14px;font-size:13px;font-weight:700;text-align:center;cursor:pointer;box-shadow:0 6px 20px rgba(63,143,91,.2);transition:transform .15s;text-decoration:none}
+.cta:active{transform:scale(.94)}
+
+/* === IOT (functional with CSS states) === */
+.liv{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:700;color:var(--ok);padding:3px 9px;background:var(--lg);border-radius:14px}
+.livd{width:6px;height:6px;border-radius:50%;background:var(--ok);animation:pu 1.5s infinite}
+.iotc{display:flex;gap:8px;padding:0 16px;margin-top:12px}
+.iotc label{flex:1;padding:11px 8px;border-radius:12px;border:2px solid var(--lg);background:#fff;font-size:10px;font-weight:700;color:var(--g);cursor:pointer;text-align:center;transition:all .2s;display:block}
+.iotc label:active{transform:scale(.93)}
+#iot-dry:checked~.app .iotc .iot-dry-l,
+#iot-normal:checked~.app .iotc .iot-norm-l,
+#iot-wet:checked~.app .iotc .iot-wet-l{background:var(--g);color:#fff;border-color:var(--g)}
+/* IoT value display */
+.iot-val{display:none}
+#iot-dry:checked~.app .iot-dry-v{display:block}
+#iot-normal:checked~.app .iot-norm-v{display:block}
+#iot-wet:checked~.app .iot-wet-v{display:block}
+.iot-dry-v,.iot-norm-v,.iot-wet-v{display:none}
+
+/* === MANDI === */
+.mdc{margin:8px 16px;background:#fff;border-radius:16px;padding:14px 16px;box-shadow:var(--sh);display:flex;align-items:center;gap:10px;cursor:pointer;transition:transform .2s}
+.mdc:active{transform:scale(.97)}
+.mdr{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0}
+.mdr.g{background:var(--cream);color:#B8860B}.mdr.s{background:#f0f0f0;color:#666}.mdr.b{background:#fef0e8;color:#B87333}
+.mdi{flex:1;min-width:0}.mdn{font-size:12px;font-weight:700}.mdd{font-size:10px;color:var(--st)}
+.mdp{text-align:right;flex-shrink:0}.mdpv{font-size:15px;font-weight:800;color:var(--g)}.mdpt{font-size:10px}
+.tu{color:var(--ok)}.td{color:var(--bad)}.ts{color:var(--st)}
+.best-tag{margin:-2px 16px 4px;text-align:right}
+.best-tag span{font-size:9px;font-weight:700;background:var(--lg);color:var(--g);padding:2px 8px;border-radius:8px}
+.estc{margin:16px;background:linear-gradient(135deg,var(--cream),#fff5d6);border-radius:var(--r);padding:20px;text-align:center;border:1px solid rgba(245,200,75,.2)}
+.estl{font-size:11px;color:var(--brown);font-weight:600}.estv{font-size:30px;font-weight:800;margin:5px 0}.estx{font-size:10px;color:var(--st)}
+
+/* === FARM === */
+.fmc{margin:0 16px 12px;background:linear-gradient(135deg,var(--lg),#f5fcf0);border-radius:20px;padding:18px;border:1px solid rgba(63,143,91,.08)}
+.fig{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 16px}
+.fic{background:#fff;border-radius:14px;padding:14px;box-shadow:var(--sh);text-align:center}
+.fii{font-size:22px;margin-bottom:4px}.fil{font-size:9px;color:var(--st)}.fiv{font-size:13px;font-weight:700;margin-top:2px}
+
+/* === TIMELINE === */
+.tl{padding:0 16px}
+.tld{font-size:11px;font-weight:700;color:var(--g);padding:12px 0 5px;text-transform:uppercase;letter-spacing:.3px}
+.tli{display:flex;gap:10px;padding:8px 0;border-left:2px solid var(--lg);padding-left:12px;margin-left:4px;position:relative}
+.tli::before{content:'';position:absolute;left:-4px;top:14px;width:7px;height:7px;border-radius:50%;background:var(--g)}
+.tlt{font-size:9px;color:var(--st);min-width:36px;padding-top:2px}.tlc{flex:1}
+.tltt{font-size:11px;font-weight:700}.tlds{font-size:10px;color:var(--st);margin-top:1px}
+
+/* === VOICE (with states) === */
+.vcon{text-align:center;padding:30px 16px}
+.micb{width:84px;height:84px;border-radius:50%;background:linear-gradient(135deg,var(--g),var(--ok));border:none;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;cursor:pointer;box-shadow:0 8px 28px rgba(63,143,91,.25);transition:transform .2s;position:relative}
+.micb:active{transform:scale(.85)}
+.mic-ring{position:absolute;width:100%;height:100%;border-radius:50%;border:3px solid var(--g);opacity:0}
+#v-listen:checked~.app .mic-ring{animation:ring 1.5s ease-out infinite}
+#v-listen:checked~.app .v-idle{display:none}
+#v-listen:checked~.app .v-active{display:block}
+.v-active{display:none}
+.mici{font-size:30px;color:#fff}
+.vt{font-size:17px;font-weight:700;margin-bottom:4px}.vs{font-size:12px;color:var(--st)}
+.vsg{margin-top:22px;display:flex;flex-direction:column;gap:8px;padding:0 6px}
+.vch{background:#fff;border-radius:12px;padding:12px 14px;font-size:11px;box-shadow:var(--sh);cursor:pointer;text-align:left;transition:transform .15s}
+.vch:active{transform:scale(.97)}
+
+/* === CHAT === */
+.chtc{padding:0 16px}
+.cb{max-width:80%;padding:11px 14px;border-radius:16px;margin-bottom:8px;font-size:12px;line-height:1.5}
+.cbu{background:var(--g);color:#fff;margin-left:auto;border-bottom-right-radius:4px}
+.cba{background:#fff;color:var(--dt);box-shadow:var(--sh);border-bottom-left-radius:4px}
+.ccc{background:var(--vlg);border-radius:10px;padding:8px 10px;margin-top:8px;font-size:10px}
+.ccr{display:flex;justify-content:space-between;padding:2px 0}
+.chat-input{margin:12px 16px;display:flex;gap:8px}
+.chat-input-field{flex:1;padding:12px 14px;border-radius:14px;border:2px solid var(--lg);background:#fff;font-size:12px;outline:none;transition:border-color .2s}
+.chat-input-field:focus{border-color:var(--g)}
+.chat-send{width:40px;height:40px;border-radius:50%;background:var(--g);border:none;color:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .15s;flex-shrink:0}
+.chat-send:active{transform:scale(.85)}
+
+/* === ALERTS === */
+.alc{margin:8px 16px;background:#fff;border-radius:16px;padding:14px 16px;box-shadow:var(--sh);display:flex;align-items:center;gap:10px;cursor:pointer;transition:transform .2s;text-decoration:none;color:inherit}
+.alc:active{transform:scale(.97)}
+.ald{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.ald.h{background:var(--bad)}.ald.m{background:var(--warn)}.ald.l{background:var(--ok)}
+.alco{flex:1;min-width:0}.altt{font-size:11px;font-weight:700}.alds{font-size:10px;color:var(--st);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.altm{font-size:9px;color:var(--st);flex-shrink:0}
+
+/* === ADMIN === */
+.adg{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 16px}
+.adc{background:#fff;border-radius:14px;padding:14px;box-shadow:var(--sh)}
+.adl{font-size:9px;color:var(--st);text-transform:uppercase;letter-spacing:.3px}
+.adv{font-size:20px;font-weight:800;margin-top:4px}.adch{font-size:9px;margin-top:2px}
+.hotspot{margin:12px 16px;background:#fff;border-radius:16px;padding:16px;box-shadow:var(--sh)}
+.hotspot-title{font-size:12px;font-weight:700;margin-bottom:8px}
+.hotspot-row{display:flex;justify-content:space-between;align-items:center;padding:7px 10px;border-radius:8px;margin-bottom:5px;font-size:11px}
+
+/* === FERTILIZER === */
+.fti{display:flex;gap:10px;padding:12px 0;align-items:flex-start}
+.ftd{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.ftd.dn{background:var(--lg)}.ftd.pd{background:var(--cream)}.ftd.fu{background:var(--lb)}
+.ftf{flex:1}.ftw{font-size:9px;color:var(--g);font-weight:700;text-transform:uppercase}
+.ftt{font-size:12px;font-weight:700;margin-top:1px}.ftds{font-size:10px;color:var(--st);margin-top:1px}
+
+/* === MORE GRID (responsive) === */
+.mgr{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;padding:0 16px}
+@media(max-width:370px){.mgr{gap:8px}}
+.mgi{background:#fff;border-radius:14px;padding:16px 8px;text-align:center;box-shadow:var(--sh);cursor:pointer;transition:transform .15s;display:block;text-decoration:none;color:inherit}
+.mgi:active{transform:scale(.9)}
+.mgic{font-size:24px;margin-bottom:5px}.mgl{font-size:9px;font-weight:700}
+
+/* === SETTINGS === */
+.settings{margin:0 16px;background:#fff;border-radius:16px;padding:4px 16px;box-shadow:var(--sh)}
+.set-row{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--vlg)}
+.set-row:last-child{border-bottom:none}
+.set-label{font-size:12px;font-weight:600}
+.set-val{font-size:11px;color:var(--g);font-weight:600}
+
+/* === LOADING DOTS === */
+.loading-dots{display:flex;gap:4px;padding:8px 0}
+.loading-dots span{width:6px;height:6px;border-radius:50%;background:var(--g);animation:dots 1.4s infinite}
+.loading-dots span:nth-child(2){animation-delay:.2s}
+.loading-dots span:nth-child(3){animation-delay:.4s}
+
+/* === RESPONSIVE FIXES === */
+@media(max-width:370px){
+  .wtp{font-size:38px}
+  .wh-icon{font-size:32px}
+  .fgrid{gap:8px}
+  .fc{padding:14px 10px}
+  .fci{font-size:24px}
+  .wmg{gap:6px}
+  .mc{padding:10px 6px}
+  .mcv{font-size:13px}
+  .adg{gap:6px}
+  .adc{padding:12px}
+  .adv{font-size:18px}
+}
+@media(min-width:431px){
+  body{border-left:1px solid #e8e8e8;border-right:1px solid #e8e8e8;box-shadow:0 0 40px rgba(0,0,0,.05)}
+}
+
+/* =========================================================
+   KISANIQ APP LAUNCH + AUTH SYSTEM
+   Does NOT modify existing app UI
+   ========================================================= */
+
+body.kq-auth-locked{
+  overflow:hidden !important;
+  padding-bottom:0 !important;
+}
+
+
+/* =========================================================
+   LAUNCH SCREEN
+   ========================================================= */
+
+#kqLaunchScreen{
+
+  position:fixed;
+
+  inset:0;
+
+  width:100%;
+  height:100vh;
+
+  background:
+    radial-gradient(
+      circle at 50% 35%,
+      rgba(232,245,216,.95) 0%,
+      rgba(243,248,233,1) 42%,
+      #edf7e5 100%
+    );
+
+  z-index:999999;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  overflow:hidden;
+
+  transition:
+    opacity .65s ease,
+    visibility .65s ease;
+
+}
+
+
+#kqLaunchScreen.kq-launch-hide{
+
+  opacity:0;
+  visibility:hidden;
+  pointer-events:none;
+
+}
+
+
+/* background glow */
+
+.kq-launch-glow{
+
+  position:absolute;
+
+  width:260px;
+  height:260px;
+
+  border-radius:50%;
+
+  background:
+    radial-gradient(
+      circle,
+      rgba(63,143,91,.16),
+      rgba(63,143,91,0)
+    );
+
+  filter:blur(8px);
+
+  animation:
+    kqGlow 3.5s ease-in-out infinite;
+
+}
+
+
+@keyframes kqGlow{
+
+  0%,100%{
+    transform:scale(.85);
+    opacity:.55;
+  }
+
+  50%{
+    transform:scale(1.15);
+    opacity:1;
+  }
+
+}
+
+
+/* launch content */
+
+.kq-launch-content{
+
+  position:relative;
+
+  width:100%;
+  max-width:430px;
+
+  text-align:center;
+
+  padding:30px;
+
+  z-index:3;
+
+}
+
+
+/* logo */
+
+.kq-launch-logo{
+
+  width:112px;
+  height:112px;
+
+  margin:0 auto 22px;
+
+  position:relative;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  animation:
+    kqLogoIntro 1.1s cubic-bezier(.2,.8,.2,1) both;
+
+}
+
+
+@keyframes kqLogoIntro{
+
+  0%{
+    opacity:0;
+    transform:
+      scale(.55)
+      rotate(-12deg);
+  }
+
+  65%{
+    opacity:1;
+    transform:
+      scale(1.08)
+      rotate(2deg);
+  }
+
+  100%{
+    transform:
+      scale(1)
+      rotate(0);
+  }
+
+}
+
+
+/* rotating outer ring */
+
+.kq-logo-ring{
+
+  position:absolute;
+
+  inset:0;
+
+  border-radius:50%;
+
+  border:
+    2px solid rgba(63,143,91,.18);
+
+  border-top-color:var(--g);
+
+  animation:
+    kqRing 4s linear infinite;
+
+}
+
+
+@keyframes kqRing{
+
+  to{
+    transform:rotate(360deg);
+  }
+
+}
+
+
+/* second ring */
+
+.kq-logo-ring-2{
+
+  position:absolute;
+
+  inset:9px;
+
+  border-radius:50%;
+
+  border:
+    1px dashed rgba(63,143,91,.22);
+
+  animation:
+    kqRingReverse 6s linear infinite;
+
+}
+
+
+@keyframes kqRingReverse{
+
+  to{
+    transform:rotate(-360deg);
+  }
+
+}
+
+
+/* actual logo */
+
+.kq-logo-core{
+
+  width:78px;
+  height:78px;
+
+  border-radius:25px;
+
+  background:
+    linear-gradient(
+      145deg,
+      #3F8F5B,
+      #42A866
+    );
+
+  box-shadow:
+    0 14px 35px rgba(63,143,91,.28);
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  position:relative;
+
+  overflow:hidden;
+
+}
+
+
+.kq-logo-core::before{
+
+  content:"";
+
+  position:absolute;
+
+  width:75px;
+  height:75px;
+
+  border-radius:50%;
+
+  background:
+    radial-gradient(
+      circle,
+      rgba(255,255,255,.2),
+      transparent 65%
+    );
+
+}
+
+
+.kq-logo-leaf{
+
+  position:absolute;
+
+  width:30px;
+  height:43px;
+
+  background:#fff;
+
+  border-radius:
+    30px
+    4px
+    30px
+    4px;
+
+  transform:
+    rotate(38deg)
+    translate(2px,-4px);
+
+}
+
+
+.kq-logo-leaf::after{
+
+  content:"";
+
+  position:absolute;
+
+  width:3px;
+  height:32px;
+
+  background:var(--g);
+
+  left:50%;
+  top:5px;
+
+  transform:
+    translateX(-50%)
+    rotate(-18deg);
+
+  border-radius:4px;
+
+}
+
+
+.kq-logo-iq{
+
+  position:absolute;
+
+  bottom:10px;
+
+  color:#fff;
+
+  font-size:12px;
+
+  font-weight:900;
+
+  letter-spacing:1px;
+
+}
+
+
+/* floating particles */
+
+.kq-particle{
+
+  position:absolute;
+
+  width:5px;
+  height:5px;
+
+  border-radius:50%;
+
+  background:var(--g);
+
+  opacity:.28;
+
+}
+
+
+.kq-p1{
+  top:18%;
+  left:19%;
+  animation:kqFloat1 4s infinite;
+}
+
+.kq-p2{
+  top:28%;
+  right:18%;
+  animation:kqFloat2 5s infinite;
+}
+
+.kq-p3{
+  bottom:26%;
+  left:25%;
+  animation:kqFloat2 4.5s infinite;
+}
+
+.kq-p4{
+  bottom:19%;
+  right:24%;
+  animation:kqFloat1 5.5s infinite;
+}
+
+
+@keyframes kqFloat1{
+
+  0%,100%{
+    transform:translateY(0);
+    opacity:.2;
+  }
+
+  50%{
+    transform:translateY(-18px);
+    opacity:.7;
+  }
+
+}
+
+
+@keyframes kqFloat2{
+
+  0%,100%{
+    transform:translate(0,0);
+    opacity:.2;
+  }
+
+  50%{
+    transform:translate(8px,-14px);
+    opacity:.65;
+  }
+
+}
+
+
+/* brand */
+
+.kq-launch-name{
+
+  font-size:34px;
+
+  font-weight:900;
+
+  letter-spacing:-1.5px;
+
+  color:var(--dt);
+
+  animation:
+    kqTextUp .8s .25s ease both;
+
+}
+
+
+.kq-launch-name span{
+
+  color:var(--g);
+
+}
+
+
+.kq-launch-tagline{
+
+  margin-top:7px;
+
+  font-size:12px;
+
+  color:var(--st);
+
+  letter-spacing:.25px;
+
+  animation:
+    kqTextUp .8s .4s ease both;
+
+}
+
+
+@keyframes kqTextUp{
+
+  from{
+    opacity:0;
+    transform:translateY(12px);
+  }
+
+  to{
+    opacity:1;
+    transform:none;
+  }
+
+}
+
+
+/* loading */
+
+.kq-launch-loading{
+
+  margin:36px auto 0;
+
+  width:170px;
+
+  animation:
+    kqTextUp .8s .55s ease both;
+
+}
+
+
+.kq-launch-bar{
+
+  width:100%;
+  height:4px;
+
+  border-radius:20px;
+
+  overflow:hidden;
+
+  background:
+    rgba(63,143,91,.12);
+
+}
+
+
+.kq-launch-progress{
+
+  width:0%;
+  height:100%;
+
+  border-radius:20px;
+
+  background:
+    linear-gradient(
+      90deg,
+      var(--g),
+      var(--ok)
+    );
+
+  animation:
+    kqProgress 2.35s cubic-bezier(.4,0,.2,1) forwards;
+
+}
+
+
+@keyframes kqProgress{
+
+  0%{
+    width:0%;
+  }
+
+  35%{
+    width:38%;
+  }
+
+  70%{
+    width:72%;
+  }
+
+  100%{
+    width:100%;
+  }
+
+}
+
+
+.kq-launch-status{
+
+  margin-top:9px;
+
+  font-size:9px;
+
+  color:var(--st);
+
+  min-height:14px;
+
+}
+
+
+/* =========================================================
+   AUTH SCREEN
+   ========================================================= */
+
+#kqAuthScreen{
+
+  position:fixed;
+
+  inset:0;
+
+  width:100%;
+  min-height:100vh;
+
+  z-index:999998;
+
+  background:
+    linear-gradient(
+      180deg,
+      #F3F8E9 0%,
+      #EDF7E5 100%
+    );
+
+  overflow-y:auto;
+
+  opacity:0;
+
+  visibility:hidden;
+
+  transition:
+    opacity .5s ease,
+    visibility .5s ease;
+
+}
+
+
+#kqAuthScreen.kq-auth-show{
+
+  opacity:1;
+
+  visibility:visible;
+
+}
+
+
+.kq-auth-wrap{
+
+  min-height:100vh;
+
+  width:100%;
+  max-width:430px;
+
+  margin:0 auto;
+
+  padding:
+    34px
+    20px
+    28px;
+
+  display:flex;
+
+  flex-direction:column;
+
+  justify-content:center;
+
+}
+
+
+.kq-auth-brand{
+
+  text-align:center;
+
+  margin-bottom:24px;
+
+}
+
+
+.kq-auth-mini-logo{
+
+  width:58px;
+  height:58px;
+
+  border-radius:18px;
+
+  margin:0 auto 10px;
+
+  display:flex;
+
+  align-items:center;
+  justify-content:center;
+
+  background:
+    linear-gradient(
+      145deg,
+      var(--g),
+      var(--ok)
+    );
+
+  box-shadow:
+    0 10px 25px rgba(63,143,91,.20);
+
+  color:#fff;
+
+  font-size:25px;
+
+}
+
+
+.kq-auth-brand-name{
+
+  font-size:25px;
+
+  font-weight:900;
+
+  letter-spacing:-.8px;
+
+}
+
+
+.kq-auth-brand-name span{
+
+  color:var(--g);
+
+}
+
+
+.kq-auth-subtitle{
+
+  margin-top:4px;
+
+  font-size:11px;
+
+  color:var(--st);
+
+}
+
+
+.kq-auth-card{
+
+  background:#fff;
+
+  border-radius:24px;
+
+  padding:22px 20px 20px;
+
+  box-shadow:
+    0 10px 35px rgba(63,143,91,.10);
+
+  border:
+    1px solid rgba(63,143,91,.06);
+
+}
+
+
+.kq-auth-title{
+
+  font-size:20px;
+
+  font-weight:800;
+
+}
+
+
+.kq-auth-description{
+
+  margin-top:4px;
+
+  font-size:10px;
+
+  line-height:1.5;
+
+  color:var(--st);
+
+}
+
+
+.kq-auth-field{
+
+  margin-top:15px;
+
+}
+
+
+.kq-auth-label{
+
+  display:block;
+
+  margin-bottom:6px;
+
+  font-size:10px;
+
+  font-weight:700;
+
+  color:var(--dt);
+
+}
+
+
+.kq-auth-input-wrap{
+
+  position:relative;
+
+}
+
+
+.kq-auth-input{
+
+  width:100%;
+
+  height:45px;
+
+  border:
+    1px solid #E2EBDD;
+
+  border-radius:13px;
+
+  background:#FAFCF8;
+
+  padding:
+    0
+    42px
+    0
+    13px;
+
+  font-size:12px;
+
+  color:var(--dt);
+
+  outline:none;
+
+  transition:
+    border-color .2s,
+    box-shadow .2s,
+    background .2s;
+
+}
+
+
+.kq-auth-input:focus{
+
+  border-color:var(--g);
+
+  background:#fff;
+
+  box-shadow:
+    0 0 0 3px rgba(63,143,91,.08);
+
+}
+
+
+.kq-auth-input-icon{
+
+  position:absolute;
+
+  right:13px;
+  top:50%;
+
+  transform:translateY(-50%);
+
+  font-size:15px;
+
+  opacity:.55;
+
+}
+
+
+.kq-auth-button{
+
+  width:100%;
+
+  height:46px;
+
+  margin-top:18px;
+
+  border:none;
+
+  border-radius:14px;
+
+  background:
+    linear-gradient(
+      135deg,
+      var(--g),
+      var(--ok)
+    );
+
+  color:#fff;
+
+  font-size:12px;
+
+  font-weight:800;
+
+  cursor:pointer;
+
+  box-shadow:
+    0 7px 20px rgba(63,143,91,.20);
+
+  transition:
+    transform .15s,
+    box-shadow .15s;
+
+}
+
+
+.kq-auth-button:active{
+
+  transform:scale(.97);
+
+}
+
+
+.kq-auth-button:disabled{
+
+  opacity:.65;
+
+  cursor:wait;
+
+}
+
+
+.kq-auth-switch{
+
+  margin-top:15px;
+
+  text-align:center;
+
+  font-size:10px;
+
+  color:var(--st);
+
+}
+
+
+.kq-auth-switch button{
+
+  border:none;
+
+  background:none;
+
+  color:var(--g);
+
+  font-weight:800;
+
+  cursor:pointer;
+
+}
+
+
+.kq-auth-message{
+
+  display:none;
+
+  margin-top:12px;
+
+  padding:9px 11px;
+
+  border-radius:10px;
+
+  font-size:10px;
+
+  line-height:1.4;
+
+}
+
+
+.kq-auth-message.show{
+
+  display:block;
+
+}
+
+
+.kq-auth-message.error{
+
+  background:#FDEAEA;
+
+  color:#B33B3B;
+
+}
+
+
+.kq-auth-message.success{
+
+  background:var(--lg);
+
+  color:#2F7849;
+
+}
+
+
+/* legal links */
+
+.kq-auth-legal{
+
+  margin-top:16px;
+
+  text-align:center;
+
+  font-size:8px;
+
+  color:var(--st);
+
+  line-height:1.55;
+
+}
+
+
+.kq-auth-legal button{
+
+  border:none;
+
+  background:none;
+
+  color:var(--g);
+
+  cursor:pointer;
+
+  font-size:8px;
+
+}
+
+
+.kq-auth-footer{
+
+  text-align:center;
+
+  margin-top:18px;
+
+  font-size:8px;
+
+  color:#839086;
+
+}
+
+
+/* =========================================================
+   INFORMATION MODAL
+   ========================================================= */
+
+#kqInfoModal{
+
+  position:fixed;
+
+  inset:0;
+
+  z-index:1000001;
+
+  display:none;
+
+  align-items:flex-end;
+
+  justify-content:center;
+
+  background:
+    rgba(23,48,31,.32);
+
+  backdrop-filter:blur(5px);
+
+}
+
+
+#kqInfoModal.show{
+
+  display:flex;
+
+}
+
+
+.kq-info-sheet{
+
+  width:100%;
+
+  max-width:430px;
+
+  max-height:84vh;
+
+  overflow-y:auto;
+
+  background:#fff;
+
+  border-radius:26px 26px 0 0;
+
+  padding:18px 18px 28px;
+
+  box-shadow:
+    0 -10px 40px rgba(0,0,0,.15);
+
+  animation:
+    kqSheetUp .3s ease both;
+
+}
+
+
+@keyframes kqSheetUp{
+
+  from{
+    transform:translateY(100%);
+  }
+
+  to{
+    transform:none;
+  }
+
+}
+
+
+.kq-info-head{
+
+  display:flex;
+
+  align-items:center;
+
+  gap:10px;
+
+  margin-bottom:15px;
+
+}
+
+
+.kq-info-icon{
+
+  width:42px;
+  height:42px;
+
+  border-radius:13px;
+
+  background:var(--lg);
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  font-size:20px;
+
+}
+
+
+.kq-info-title{
+
+  font-size:15px;
+
+  font-weight:800;
+
+}
+
+
+.kq-info-close{
+
+  margin-left:auto;
+
+  width:34px;
+  height:34px;
+
+  border:none;
+
+  border-radius:50%;
+
+  background:var(--vlg);
+
+  cursor:pointer;
+
+}
+
+
+.kq-info-section{
+
+  margin-top:14px;
+
+  padding:13px;
+
+  background:#FAFCF8;
+
+  border-radius:14px;
+
+}
+
+
+.kq-info-section h4{
+
+  font-size:11px;
+
+  margin-bottom:5px;
+
+  color:var(--g);
+
+}
+
+
+.kq-info-section p{
+
+  font-size:9.5px;
+
+  line-height:1.65;
+
+  color:var(--st);
+
+}
+
+
+.kq-info-actions{
+
+  display:grid;
+
+  grid-template-columns:1fr 1fr;
+
+  gap:8px;
+
+  margin-top:12px;
+
+}
+
+
+.kq-info-action{
+
+  padding:12px 8px;
+
+  border:none;
+
+  border-radius:13px;
+
+  background:#fff;
+
+  box-shadow:var(--sh);
+
+  font-size:10px;
+
+  font-weight:700;
+
+  cursor:pointer;
+
+  color:var(--dt);
+
+}
+
+
+.kq-info-action:active{
+
+  transform:scale(.96);
+
+}
+
+
+/* =========================================================
+   PROFILE / LOGOUT SHEET
+   ========================================================= */
+
+#kqProfileModal{
+
+  position:fixed;
+
+  inset:0;
+
+  z-index:1000000;
+
+  display:none;
+
+  align-items:flex-end;
+
+  justify-content:center;
+
+  background:rgba(23,48,31,.25);
+
+  backdrop-filter:blur(4px);
+
+}
+
+
+#kqProfileModal.show{
+
+  display:flex;
+
+}
+
+
+.kq-profile-sheet{
+
+  width:100%;
+
+  max-width:430px;
+
+  background:#fff;
+
+  border-radius:25px 25px 0 0;
+
+  padding:20px;
+
+  animation:kqSheetUp .3s ease both;
+
+}
+
+
+.kq-profile-head{
+
+  display:flex;
+
+  align-items:center;
+
+  gap:11px;
+
+  margin-bottom:15px;
+
+}
+
+
+.kq-profile-avatar{
+
+  width:48px;
+  height:48px;
+
+  border-radius:50%;
+
+  background:
+    linear-gradient(
+      135deg,
+      var(--g),
+      var(--ok)
+    );
+
+  color:#fff;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  font-weight:800;
+
+}
+
+
+.kq-profile-name{
+
+  font-size:14px;
+
+  font-weight:800;
+
+}
+
+
+.kq-profile-email{
+
+  font-size:9px;
+
+  color:var(--st);
+
+  margin-top:2px;
+
+}
+
+
+.kq-profile-button{
+
+  width:100%;
+
+  border:none;
+
+  background:var(--vlg);
+
+  border-radius:13px;
+
+  padding:12px;
+
+  margin-top:7px;
+
+  text-align:left;
+
+  font-size:10px;
+
+  font-weight:700;
+
+  cursor:pointer;
+
+}
+
+
+.kq-profile-button.danger{
+
+  background:#FDEAEA;
+
+  color:var(--bad);
+
+}
+
+
+/* =========================================================
+   REDUCED MOTION
+   ========================================================= */
+
+@media(prefers-reduced-motion:reduce){
+
+  #kqLaunchScreen *,
+  #kqAuthScreen *{
+
+    animation:none !important;
+
+    transition:none !important;
+
+  }
+
+}
+
+</style>
+</head>
+<body>
+
+<!-- =========================================================
+     KISANIQ LAUNCH SCREEN
+     ========================================================= -->
+
+<div id="kqLaunchScreen">
+
+  <div class="kq-launch-glow"></div>
+
+  <div class="kq-particle kq-p1"></div>
+  <div class="kq-particle kq-p2"></div>
+  <div class="kq-particle kq-p3"></div>
+  <div class="kq-particle kq-p4"></div>
+
+  <div class="kq-launch-content">
+
+    <div class="kq-launch-logo">
+
+      <div class="kq-logo-ring"></div>
+
+      <div class="kq-logo-ring-2"></div>
+
+      <div class="kq-logo-core">
+
+        <div class="kq-logo-leaf"></div>
+
+        <div class="kq-logo-iq">
+          IQ
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <div class="kq-launch-name">
+      Kisan<span>IQ</span>
+    </div>
+
+
+    <div class="kq-launch-tagline">
+      Smart farming. Better decisions.
+    </div>
+
+
+    <div class="kq-launch-loading">
+
+      <div class="kq-launch-bar">
+        <div class="kq-launch-progress"></div>
+      </div>
+
+      <div
+        id="kqLaunchStatus"
+        class="kq-launch-status"
+      >
+        Preparing your farm intelligence...
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- =========================================================
+     KISANIQ LOGIN / SIGNUP
+     ========================================================= -->
+
+<div id="kqAuthScreen">
+
+  <div class="kq-auth-wrap">
+
+    <div class="kq-auth-brand">
+
+      <div class="kq-auth-mini-logo">
+        🌱
+      </div>
+
+      <div class="kq-auth-brand-name">
+        Kisan<span>IQ</span>
+      </div>
+
+      <div class="kq-auth-subtitle">
+        Your intelligent farming companion
+      </div>
+
+    </div>
+
+
+    <div class="kq-auth-card">
+
+      <div
+        id="kqAuthTitle"
+        class="kq-auth-title"
+      >
+        Welcome back 👋
+      </div>
+
+      <div
+        id="kqAuthDescription"
+        class="kq-auth-description"
+      >
+        Sign in to continue to your personalized farm dashboard.
+      </div>
+
+
+      <!-- NAME — SIGNUP ONLY -->
+
+      <div
+        id="kqNameField"
+        class="kq-auth-field"
+        style="display:none"
+      >
+
+        <label class="kq-auth-label">
+          Full Name
+        </label>
+
+        <div class="kq-auth-input-wrap">
+
+          <input
+            id="kqNameInput"
+            class="kq-auth-input"
+            type="text"
+            placeholder="Enter your name"
+            autocomplete="name"
+          >
+
+          <span class="kq-auth-input-icon">
+            👤
+          </span>
+
+        </div>
+
+      </div>
+
+
+      <!-- EMAIL -->
+
+      <div class="kq-auth-field">
+
+        <label class="kq-auth-label">
+          Email Address
+        </label>
+
+        <div class="kq-auth-input-wrap">
+
+          <input
+            id="kqEmailInput"
+            class="kq-auth-input"
+            type="email"
+            placeholder="you@example.com"
+            autocomplete="email"
+          >
+
+          <span class="kq-auth-input-icon">
+            ✉️
+          </span>
+
+        </div>
+
+      </div>
+
+
+      <!-- PASSWORD -->
+
+      <div class="kq-auth-field">
+
+        <label class="kq-auth-label">
+          Password
+        </label>
+
+        <div class="kq-auth-input-wrap">
+
+          <input
+            id="kqPasswordInput"
+            class="kq-auth-input"
+            type="password"
+            placeholder="Enter your password"
+            autocomplete="current-password"
+          >
+
+          <button
+            type="button"
+            onclick="toggleKQPassword()"
+            style="
+              position:absolute;
+              right:8px;
+              top:50%;
+              transform:translateY(-50%);
+              border:none;
+              background:none;
+              cursor:pointer;
+              font-size:13px;
+            "
+            aria-label="Show password"
+          >
+            👁️
+          </button>
+
+        </div>
+
+      </div>
+
+
+      <!-- CONFIRM PASSWORD -->
+
+      <div
+        id="kqConfirmField"
+        class="kq-auth-field"
+        style="display:none"
+      >
+
+        <label class="kq-auth-label">
+          Confirm Password
+        </label>
+
+        <div class="kq-auth-input-wrap">
+
+          <input
+            id="kqConfirmInput"
+            class="kq-auth-input"
+            type="password"
+            placeholder="Re-enter your password"
+            autocomplete="new-password"
+          >
+
+          <span class="kq-auth-input-icon">
+            🔒
+          </span>
+
+        </div>
+
+      </div>
+
+
+      <!-- MESSAGE -->
+
+      <div
+        id="kqAuthMessage"
+        class="kq-auth-message"
+      ></div>
+
+
+      <!-- BUTTON -->
+
+      <button
+        id="kqAuthButton"
+        class="kq-auth-button"
+        type="button"
+        onclick="submitKQAuth()"
+      >
+        Sign In
+      </button>
+
+
+      <!-- SWITCH -->
+
+      <div class="kq-auth-switch">
+
+        <span id="kqSwitchText">
+          New to KisanIQ?
+        </span>
+
+        <button
+          type="button"
+          onclick="toggleKQAuthMode()"
+          id="kqSwitchButton"
+        >
+          Create account
+        </button>
+
+      </div>
+
+
+      <!-- LEGAL -->
+
+      <div class="kq-auth-legal">
+
+        By continuing, you agree to the
+
+        <button
+          type="button"
+          onclick="openKQInfo('terms')"
+        >
+          Terms of Service
+        </button>
+
+        and
+
+        <button
+          type="button"
+          onclick="openKQInfo('privacy')"
+        >
+          Privacy Policy
+        </button>.
+
+        <br>
+
+        Agricultural recommendations are informational and
+        should be verified with local agricultural experts
+        where appropriate.
+
+      </div>
+
+    </div>
+
+
+    <!-- INFO BUTTON -->
+
+    <button
+      type="button"
+      onclick="openKQInfo('about')"
+      style="
+        margin:16px auto 0;
+        display:block;
+        border:none;
+        background:none;
+        color:var(--g);
+        font-size:10px;
+        font-weight:700;
+        cursor:pointer;
+      "
+    >
+      About KisanIQ • Contact • Legal
+    </button>
+
+
+    <div class="kq-auth-footer">
+
+      © 2026 KisanIQ. All rights reserved.
+
+      <br>
+
+      KisanIQ is an agricultural decision-support platform.
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- =========================================================
+     INFORMATION MODAL
+     ========================================================= -->
+
+<div
+  id="kqInfoModal"
+  onclick="closeKQInfoOutside(event)"
+>
+
+  <div
+    class="kq-info-sheet"
+    onclick="event.stopPropagation()"
+  >
+
+    <div class="kq-info-head">
+
+      <div
+        id="kqInfoIcon"
+        class="kq-info-icon"
+      >
+        🌱
+      </div>
+
+      <div
+        id="kqInfoTitle"
+        class="kq-info-title"
+      >
+        About KisanIQ
+      </div>
+
+      <button
+        class="kq-info-close"
+        onclick="closeKQInfo()"
+        aria-label="Close"
+      >
+        ✕
+      </button>
+
+    </div>
+
+
+    <div id="kqInfoContent"></div>
+
+
+    <div class="kq-info-actions">
+
+      <button
+        class="kq-info-action"
+        onclick="openKQInfo('about')"
+      >
+        🌱 About Us
+      </button>
+
+      <button
+        class="kq-info-action"
+        onclick="openKQInfo('contact')"
+      >
+        📞 Contact Us
+      </button>
+
+      <button
+        class="kq-info-action"
+        onclick="openKQInfo('privacy')"
+      >
+        🔒 Privacy
+      </button>
+
+      <button
+        class="kq-info-action"
+        onclick="openKQInfo('terms')"
+      >
+        📜 Terms
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- =========================================================
+     PROFILE MODAL
+     ========================================================= -->
+
+<div
+  id="kqProfileModal"
+  onclick="closeKQProfileOutside(event)"
+>
+
+  <div
+    class="kq-profile-sheet"
+    onclick="event.stopPropagation()"
+  >
+
+    <div class="kq-profile-head">
+
+      <div
+        id="kqProfileAvatar"
+        class="kq-profile-avatar"
+      >
+        K
+      </div>
+
+      <div>
+
+        <div
+          id="kqProfileName"
+          class="kq-profile-name"
+        >
+          KisanIQ User
+        </div>
+
+        <div
+          id="kqProfileEmail"
+          class="kq-profile-email"
+        >
+          —
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <button
+      class="kq-profile-button"
+      onclick="openKQInfo('about')"
+    >
+      ℹ️ About KisanIQ
+    </button>
+
+
+    <button
+      class="kq-profile-button"
+      onclick="openKQInfo('contact')"
+    >
+      📞 Contact & Support
+    </button>
+
+
+    <button
+      class="kq-profile-button"
+      onclick="openKQInfo('privacy')"
+    >
+      🔒 Privacy Policy
+    </button>
+
+
+    <button
+      class="kq-profile-button"
+      onclick="openKQInfo('terms')"
+    >
+      📜 Terms of Service
+    </button>
+
+
+    <button
+      class="kq-profile-button danger"
+      onclick="deleteKQAccount()"
+    >
+      🗑️ Delete Account
+    </button>
+
+
+    <button
+      class="kq-profile-button danger"
+      onclick="logoutKQ()"
+    >
+      🚪 Sign Out
+    </button>
+
+  </div>
+
+</div>
+
+<!-- SINGLE unified radio group for ALL pages -->
+<input type="radio" name="pg" id="p-home" checked>
+<input type="radio" name="pg" id="p-weather">
+<input type="radio" name="pg" id="p-crop">
+<input type="radio" name="pg" id="p-irrigation">
+<input type="radio" name="pg" id="p-fertilizer">
+<input type="radio" name="pg" id="p-mandi">
+<input type="radio" name="pg" id="p-farm">
+<input type="radio" name="pg" id="p-history">
+<input type="radio" name="pg" id="p-voice">
+<input type="radio" name="pg" id="p-assistant">
+<input type="radio" name="pg" id="p-alerts">
+<input type="radio" name="pg" id="p-iot">
+<input type="radio" name="pg" id="p-admin">
+<input type="radio" name="pg" id="p-more">
+
+<!-- IoT state radios -->
+<input type="radio" name="iot" id="iot-dry">
+<input type="radio" name="iot" id="iot-normal" checked>
+<input type="radio" name="iot" id="iot-wet">
+
+<!-- Voice state -->
+<input type="radio" name="vst" id="v-idle" checked>
+<input type="radio" name="vst" id="v-listen">
+
+<!-- Crop scan state -->
+<input type="radio" name="scan" id="scan-idle" checked>
+<input type="radio" name="scan" id="scan-active">
+
+<div class="app">
+
+<!-- ===== HOME ===== -->
+<div class="pg pg-home">
+  <div class="hdr">
+    <div class="hdr-l">
+      <button
+  class="av"
+  type="button"
+  onclick="openKQProfile()"
+  id="kqHomeAvatar"
+  style="border:none;cursor:pointer"
+  aria-label="Open profile"
+>
+  R
+</button>
+
+<div>
+  <div class="grt">
+    Good Morning 👋
+  </div>
+
+  <div
+    class="grn"
+    id="kqHomeUserName"
+  >
+    Yugang Gaurav
+  </div>
+</div>
+    </div>
+    <label class="ibtn" for="p-alerts" aria-label="Notifications">🔔</label>
+  </div>
+  <div class="sbar"><span class="sdot"></span>Online • Farm synced</div>
+
+  <label for="p-weather" style="display:block;text-decoration:none;color:inherit" aria-label="View weather details">
+    <div class="wh an">
+      <span class="wh-icon">⛅</span>
+      <div class="wloc">📍 Nadia, West Bengal</div>
+      <div class="wtp">29°C</div>
+      <div class="wds">Partly Cloudy</div>
+      <div class="wadv">🌧️ Rain expected tomorrow — consider delaying irrigation</div>
+      <div class="wmt"><span>💧 Rain 82%</span><span>💨 3 m/s</span><span>🌡️ Feels 31°C</span></div>
+    </div>
+  </label>
+
+  <div class="sec">Manage Your Farm</div>
+  <div class="fgrid">
+    <label for="p-farm" class="fc gt an"><span class="fci">🌾</span><div class="fct">My Farm</div><div class="fcd">2.5 acres • Tomato</div></label>
+    <label for="p-crop" class="fc bt an d1"><span class="fci">📷</span><div class="fct">Crop Doctor</div><div class="fcd">AI disease detection</div></label>
+    <label for="p-irrigation" class="fc bt an d2"><span class="fci">💧</span><div class="fct">Irrigation</div><div class="fcd">Smart water advice</div></label>
+    <label for="p-fertilizer" class="fc et an d3"><span class="fci">🧪</span><div class="fct">Fertilizer</div><div class="fcd">Nutrient planning</div></label>
+    <label for="p-mandi" class="fc yt an d4"><span class="fci">💰</span><div class="fct">Mandi Prices</div><div class="fcd">Best selling options</div></label>
+    <label for="p-weather" class="fc bt an d5"><span class="fci">🌦️</span><div class="fct">Weather</div><div class="fcd">7-day forecast</div></label>
+    <label for="p-history" class="fc gt an d6"><span class="fci">📊</span><div class="fct">Farm History</div><div class="fcd">Activity timeline</div></label>
+    <label for="p-voice" class="fc pt an"><span class="fci">🎤</span><div class="fct">KisanIQ</div><div class="fcd">Voice assistant</div></label>
+  </div>
+
+  <div class="sec">Today's Farm Plan</div>
+  <label for="p-crop" class="plc an" aria-label="View crop health">
+    <div class="pli rd">🌱</div>
+    <div class="plcn"><div class="plct">Crop Health Alert</div><div class="plcs">Early Blight detected • 91% confidence</div></div>
+    <span class="plb ba">Action</span>
+  </label>
+  <label for="p-irrigation" class="plc an d1" aria-label="View irrigation">
+    <div class="pli bl">💧</div>
+    <div class="plcn"><div class="plct">Skip Irrigation Today</div><div class="plcs">Rain expected tomorrow</div></div>
+    <span class="plb bi">Advisory</span>
+  </label>
+  <label for="p-mandi" class="plc an d2" aria-label="View mandi prices">
+    <div class="pli yl">💰</div>
+    <div class="plcn"><div class="plct">Best Price Nearby</div><div class="plcs">Kalyani Mandi • ₹29/kg</div></div>
+    <span class="plb bs">↑ 8%</span>
+  </label>
+</div>
+
+<!-- ===== WEATHER ===== -->
+<div class="pg pg-weather">
+  <div class="phdr"><label class="bbtn" for="p-home" aria-label="Back">←</label><div class="ptit">Weather Information 🌦️</div></div>
+  <div class="wdc an">
+    <div class="wdtp">29°C</div><div class="wdds">Partly Cloudy</div><div class="wdlc">📍 Nadia, West Bengal</div>
+  </div>
+  <div class="wmg">
+    <div class="mc an"><div class="mci">🌡️</div><div class="mcv">28°C</div><div class="mcl">Soil Temp</div></div>
+    <div class="mc an d1"><div class="mci">💨</div><div class="mcv">3 m/s</div><div class="mcl">Wind</div></div>
+    <div class="mc an d2"><div class="mci">🌧️</div><div class="mcv">82%</div><div class="mcl">Rain</div></div>
+    <div class="mc an d3"><div class="mci">💧</div><div class="mcv">72%</div><div class="mcl">Humidity</div></div>
+    <div class="mc an d4"><div class="mci">☀️</div><div class="mcv">5:25</div><div class="mcl">Sunrise</div></div>
+    <div class="mc an d5"><div class="mci">🌙</div><div class="mcv">6:10</div><div class="mcl">Sunset</div></div>
+  </div>
+  <div class="wrc an"><div class="wrt">⚠️ FARM ADVISORY</div><div class="wrx">Rain is expected tomorrow. Consider delaying irrigation today. Monday is a bad day to apply irrigation.</div></div>
+  <div class="sec">Next 7 Days</div>
+  <div class="fcr">
+    <div class="fcc"><div class="fcd2">Today</div><div class="fcic">⛅</div><div class="fctp">29°C</div><div class="fcrn">💧 18%</div></div>
+    <div class="fcc"><div class="fcd2">Sun</div><div class="fcic">🌧️</div><div class="fctp">27°C</div><div class="fcrn">💧 82%</div></div>
+    <div class="fcc"><div class="fcd2">Mon</div><div class="fcic">🌧️</div><div class="fctp">26°C</div><div class="fcrn">💧 86%</div></div>
+    <div class="fcc"><div class="fcd2">Tue</div><div class="fcic">⛅</div><div class="fctp">28°C</div><div class="fcrn">💧 40%</div></div>
+    <div class="fcc"><div class="fcd2">Wed</div><div class="fcic">☀️</div><div class="fctp">30°C</div><div class="fcrn">💧 12%</div></div>
+    <div class="fcc"><div class="fcd2">Thu</div><div class="fcic">☀️</div><div class="fctp">31°C</div><div class="fcrn">💧 8%</div></div>
+    <div class="fcc"><div class="fcd2">Fri</div><div class="fcic">⛅</div><div class="fctp">29°C</div><div class="fcrn">💧 22%</div></div>
+  </div>
+</div>
+
+<!-- ===== CROP DOCTOR ===== -->
+<div class="pg pg-crop">
+  <div class="phdr"><label class="bbtn" for="p-home" aria-label="Back">←</label><div class="ptit">Crop Doctor 🌱</div></div>
+  <p style="padding:0 16px;font-size:12px;color:var(--st);line-height:1.5;margin-bottom:8px">Take a photo of your crop and let KisanIQ check its health.</p>
+
+<div class="scan-idle">
+
+  <label
+    class="upa an"
+    for="cropImageInput"
+    aria-label="Take or upload crop photo"
+  >
+
+    <div class="upi">📷</div>
+
+    <div class="upt">
+      Take a Crop Photo
+    </div>
+
+    <div class="ups">
+      Camera or upload from gallery
+    </div>
+
+  </label>
+
+  <input
+    id="cropImageInput"
+    type="file"
+    accept="image/*"
+    capture="environment"
+    style="display:none"
+    onchange="analyzeCropImage(event)"
+  >
+
+</div>
+
+  <div class="scan-result">
+    <div class="rsc an" style="margin:12px 16px;background:linear-gradient(135deg,#f8fdf5,#fff);border:1px solid rgba(63,143,91,.08)">
+      <div style="text-align:center;padding:8px 0;font-size:11px;color:var(--ok);font-weight:600">✓ Scan Complete</div>
+    </div>
+  </div>
+
+  <div class="sec">Latest Scan Result</div>
+  <div class="rsc an d1">
+    <div class="rsh"><div class="rsb rd">🍂</div><div><div class="rsn">Early Blight</div><div class="rscf">91% confidence • 🔴 Action Required</div></div></div>
+    <div class="gcon">
+      <svg class="gsvg" viewBox="0 0 100 100"><circle class="gbg" cx="50" cy="50" r="42"/><circle class="gfl" cx="50" cy="50" r="42" stroke="var(--bad)" stroke-dasharray="240 264" stroke-dashoffset="0" transform="rotate(-90 50 50)"/></svg>
+      <div class="gtx"><div class="gv" style="color:var(--bad)">91%</div><div class="gl">Confidence</div></div>
+    </div>
+  </div>
+  <details><summary>🔍 What we found</summary><div class="dc">Dark brown spots with concentric rings on lower leaves. Pattern consistent with Alternaria solani (Early Blight). Detected on 3 leaf samples in the uploaded image.</div></details>
+  <details><summary>💊 What you should do</summary><div class="dc">1. Remove affected leaves immediately<br>2. Apply Mancozeb 75% WP @ 2.5g/L<br>3. Ensure proper spacing for air circulation<br>4. Avoid overhead irrigation<br>5. Re-scan in 3 days</div></details>
+  <details><summary>🧠 Why KisanIQ thinks this</summary><div class="dc">AI detected concentric ring patterns (bull's-eye lesions) characteristic of Early Blight. Combined with 72% humidity and flowering stage, conditions are highly favorable. Confidence is high due to clear visual markers.</div></details>
+  <label for="scan-idle" class="cta">Scan Another Crop →</label>
+</div>
+
+<!-- ===== IRRIGATION ===== -->
+<div class="pg pg-irrigation">
+  <div class="phdr"><label class="bbtn" for="p-home" aria-label="Back">←</label><div class="ptit">Smart Irrigation 💧</div></div>
+  <div style="text-align:center;padding:6px 16px">
+    <div class="gcon">
+      <svg class="gsvg" viewBox="0 0 100 100"><circle class="gbg" cx="50" cy="50" r="42"/><circle class="gfl" cx="50" cy="50" r="42" stroke="var(--warn)" stroke-dasharray="84 264" stroke-dashoffset="0" transform="rotate(-90 50 50)"/></svg>
+      <div class="gtx"><div class="gv" style="color:var(--warn)">32%</div><div class="gl">Soil Moisture</div></div>
+    </div>
+    <div style="font-size:12px;font-weight:700;color:var(--warn)">🟡 Moderate</div>
+  </div>
+  <div style="display:flex;gap:8px;padding:0 16px;margin:12px 0">
+    <div class="mc an" style="flex:1"><div class="mci">🌧️</div><div class="mcv">82%</div><div class="mcl">Rain Probability</div></div>
+    <div class="mc an d1" style="flex:1"><div class="mci">🌡️</div><div class="mcv">29°C</div><div class="mcl">Temperature</div></div>
+  </div>
+  <div class="rcrd an d2"><div class="rci">🤖</div><div class="rctt">KisanIQ Recommendation</div><div class="rctx"><strong>Don't irrigate today.</strong><br><br>Rain is expected tomorrow and your soil currently has enough moisture for the flowering stage.</div></div>
+  <details><summary>🧠 Why this recommendation?</summary><div class="dc"><strong>Soil moisture:</strong> 32% (adequate for flowering)<br><strong>Rain probability:</strong> 82% tomorrow<br><strong>Crop stage:</strong> Flowering<br><strong>Temperature:</strong> 29°C<br><strong>Evaporation rate:</strong> Low (cloudy)<br><br>Irrigating now would waste water since rain is highly likely within 24 hours.</div></details>
+  <label for="p-iot" class="cta" aria-label="View soil monitor">View Live Soil Monitor →</label>
+</div>
+
+<!-- ===== IOT SOIL MONITOR ===== -->
+<div class="pg pg-iot">
+  <div class="phdr"><label class="bbtn" for="p-irrigation" aria-label="Back">←</label><div class="ptit">Soil Monitor 🌱</div></div>
+  <div style="text-align:center;padding:0 16px 6px"><span class="liv"><span class="livd"></span> LIVE</span></div>
+
+  <!-- DRY STATE -->
+  <div class="iot-dry-v">
+    <div class="rsc an" style="margin:8px 16px">
+      <div style="text-align:center;margin-bottom:12px;font-size:11px;color:var(--st);font-weight:600">LIVE SOIL STATUS</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center">
+        <div><div style="font-size:20px">💧</div><div style="font-size:18px;font-weight:800;color:var(--bad)">12%</div><div style="font-size:9px;color:var(--st)">Moisture</div></div>
+        <div><div style="font-size:20px">🌡️</div><div style="font-size:18px;font-weight:800;color:var(--bad)">34°C</div><div style="font-size:9px;color:var(--st)">Temp</div></div>
+        <div><div style="font-size:20px">💨</div><div style="font-size:18px;font-weight:800;color:var(--warn)">45%</div><div style="font-size:9px;color:var(--st)">Humidity</div></div>
+      </div>
+      <div style="text-align:center;margin-top:12px;padding-top:10px;border-top:1px solid var(--lg);font-size:10px;color:var(--st)">🟢 Online • Updated 1 min ago</div>
+    </div>
+    <div class="rcrd" style="background:linear-gradient(135deg,#FDEAEA,#fff5f5);border-color:rgba(232,93,93,.15)"><div class="rci">🚨</div><div class="rctt" style="color:var(--bad)">Urgent: Irrigate Now</div><div class="rctx">Soil is critically dry (12%). Crop is under water stress. Irrigate immediately with 15-20 liters per plant.</div></div>
+  </div>
+
+  <!-- NORMAL STATE -->
+  <div class="iot-norm-v">
+    <div class="rsc an" style="margin:8px 16px">
+      <div style="text-align:center;margin-bottom:12px;font-size:11px;color:var(--st);font-weight:600">LIVE SOIL STATUS</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center">
+        <div><div style="font-size:20px">💧</div><div style="font-size:18px;font-weight:800;color:var(--ok)">32%</div><div style="font-size:9px;color:var(--st)">Moisture</div></div>
+        <div><div style="font-size:20px">🌡️</div><div style="font-size:18px;font-weight:800;color:var(--warn)">29°C</div><div style="font-size:9px;color:var(--st)">Temp</div></div>
+        <div><div style="font-size:20px">💨</div><div style="font-size:18px;font-weight:800;color:var(--sky)">64%</div><div style="font-size:9px;color:var(--st)">Humidity</div></div>
+      </div>
+      <div style="text-align:center;margin-top:12px;padding-top:10px;border-top:1px solid var(--lg);font-size:10px;color:var(--st)">🟢 Online • Updated 2 min ago</div>
+    </div>
+    <div class="rcrd"><div class="rci">✅</div><div class="rctt">No Irrigation Needed</div><div class="rctx">Soil moisture is adequate (32%). Rain expected tomorrow. Wait until conditions change before irrigating.</div></div>
+  </div>
+
+  <!-- WET STATE -->
+  <div class="iot-wet-v">
+    <div class="rsc an" style="margin:8px 16px">
+      <div style="text-align:center;margin-bottom:12px;font-size:11px;color:var(--st);font-weight:600">LIVE SOIL STATUS</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center">
+        <div><div style="font-size:20px">💧</div><div style="font-size:18px;font-weight:800;color:var(--sky)">78%</div><div style="font-size:9px;color:var(--st)">Moisture</div></div>
+        <div><div style="font-size:20px">🌡️</div><div style="font-size:18px;font-weight:800;color:var(--ok)">24°C</div><div style="font-size:9px;color:var(--st)">Temp</div></div>
+        <div><div style="font-size:20px">💨</div><div style="font-size:18px;font-weight:800;color:var(--sky)">88%</div><div style="font-size:9px;color:var(--st)">Humidity</div></div>
+      </div>
+      <div style="text-align:center;margin-top:12px;padding-top:10px;border-top:1px solid var(--lg);font-size:10px;color:var(--st)">🟢 Online • Updated just now</div>
+    </div>
+    <div class="rcrd" style="background:linear-gradient(135deg,var(--lb),#f0faff);border-color:rgba(101,197,232,.15)"><div class="rci">💧</div><div class="rctt" style="color:var(--sky)">Soil is Saturated</div><div class="rctx">Moisture is very high (78%). Do not irrigate. Ensure drainage is clear to prevent root rot. Check again in 24 hours.</div></div>
+  </div>
+
+  <div class="sec">Simulate Soil Condition</div>
+  <div class="iotc">
+    <label for="iot-dry" class="iot-dry-l">🏜️ Dry</label>
+    <label for="iot-normal" class="iot-norm-l">🌿 Normal</label>
+    <label for="iot-wet" class="iot-wet-l">💦 Wet</label>
+  </div>
+</div>
+
+<!-- ===== FERTILIZER ===== -->
+<div class="pg pg-fertilizer">
+
+  <div class="phdr">
+    <label
+      class="bbtn"
+      for="p-home"
+      aria-label="Back"
+    >
+      ←
+    </label>
+
+    <div class="ptit">
+      Smart Fertilizer 🧪
+    </div>
+  </div>
+
+  <!-- ACTIVE FARM / CROP -->
+  <div
+    id="fertilizerFarmHeader"
+    class="rsc an"
+    style="
+      margin:0 16px 12px;
+      background:linear-gradient(135deg,#faf5ef,#fff)
+    "
+  >
+    <!-- JavaScript fills this -->
+  </div>
+
+  <div class="sec">
+    Your Fertilizer Plan
+  </div>
+
+  <!-- DYNAMIC FERTILIZER PLAN -->
+  <div
+    id="fertilizerPlan"
+    style="padding:0 16px"
+  >
+    <!-- JavaScript fills this -->
+  </div>
+
+  <!-- KISANIQ RECOMMENDATION -->
+  <div
+    id="fertilizerRecommendation"
+    class="rcrd an d4"
+  >
+    <!-- JavaScript fills this -->
+  </div>
+
+</div>
+
+<!-- ===== MANDI ===== -->
+<div class="pg pg-mandi">
+
+  <div class="phdr">
+    <label
+      class="bbtn"
+      for="p-home"
+      aria-label="Back"
+    >
+      ←
+    </label>
+
+    <div class="ptit">
+      Where Should I Sell? 💰
+    </div>
+  </div>
+
+  <!-- ACTIVE CROP -->
+  <div
+    id="mandiFarmHeader"
+    style="
+      padding:0 16px 8px;
+      display:flex;
+      align-items:center;
+      gap:10px
+    "
+  >
+    <!-- JavaScript fills this -->
+  </div>
+
+  <!-- DYNAMIC MANDI RESULTS -->
+  <div id="mandiResults">
+    <!-- JavaScript fills this -->
+  </div>
+
+  <!-- ESTIMATED SALE -->
+  <div
+    id="mandiEstimatedSale"
+    class="estc an d3"
+  >
+    <!-- JavaScript fills this -->
+  </div>
+
+</div>
+
+<!-- ===== MY FARM ===== -->
+<div class="pg pg-farm">
+
+  <div class="phdr">
+    <label class="bbtn" for="p-home" aria-label="Back">←</label>
+    <div class="ptit">My Farm 🌾</div>
+  </div>
+
+  <!-- ACTIVE FARM -->
+  <div id="activeFarmContainer">
+    <!-- JavaScript loads active farm here -->
+  </div>
+
+  <!-- FARM ACTIONS -->
+  <div class="farm-actions">
+
+    <button
+      class="farm-action primary"
+      type="button"
+      onclick="showFarmForm()"
+    >
+      ＋ Add Farm
+    </button>
+
+    <button
+      class="farm-action"
+      type="button"
+      onclick="editActiveFarm()"
+    >
+      ✏️ Edit Farm
+    </button>
+
+    <button
+      class="farm-action"
+      type="button"
+      onclick="setActiveFarmFromList()"
+    >
+      ⭐ Switch Farm
+    </button>
+
+    <button
+      class="farm-action danger"
+      type="button"
+      onclick="removeActiveFarm()"
+    >
+      🗑️ Remove Farm
+    </button>
+
+  </div>
+
+  <!-- ADD / EDIT FARM FORM -->
+  <div
+    id="farmFormContainer"
+    class="farm-form"
+    style="display:none"
+  >
+
+    <div
+      id="farmFormTitle"
+      class="farm-form-title"
+    >
+      Add New Farm
+    </div>
+
+    <div class="farm-field">
+      <label>Farm Name</label>
+      <input
+        id="farmNameInput"
+        type="text"
+        placeholder="e.g. Farm 02"
+      >
+    </div>
+
+    <div class="farm-field">
+      <label>Area (acres)</label>
+      <input
+        id="farmAreaInput"
+        type="number"
+        step="0.1"
+        min="0"
+        placeholder="e.g. 2.5"
+      >
+    </div>
+
+    <div class="farm-field">
+      <label>Crop</label>
+      <input
+        id="farmCropInput"
+        type="text"
+        placeholder="e.g. Tomato"
+      >
+    </div>
+
+    <div class="farm-field">
+      <label>Location</label>
+      <input
+        id="farmLocationInput"
+        type="text"
+        placeholder="e.g. Nadia, West Bengal"
+      >
+    </div>
+
+    <div class="farm-field">
+      <label>Growth Stage</label>
+
+      <select id="farmStageInput">
+        <option value="Seedling">🌱 Seedling</option>
+        <option value="Vegetative">🌿 Vegetative</option>
+        <option value="Flowering" selected>🌸 Flowering</option>
+        <option value="Fruiting">🍅 Fruiting</option>
+        <option value="Harvesting">🧺 Harvesting</option>
+      </select>
+
+    </div>
+
+    <div style="display:flex;gap:8px">
+
+      <button
+        class="farm-action primary"
+        style="flex:1"
+        type="button"
+        onclick="saveFarm()"
+      >
+        ✓ Save Farm
+      </button>
+
+      <button
+        class="farm-action"
+        style="flex:1"
+        type="button"
+        onclick="hideFarmForm()"
+      >
+        Cancel
+      </button>
+
+    </div>
+
+  </div>
+
+  <!-- FARM LIST -->
+  <div class="sec">
+    Your Farms
+  </div>
+
+  <div
+    id="farmList"
+    class="farm-list"
+  >
+  </div>
+
+  <!-- FARM QUICK INFO -->
+  <div class="sec">
+    Farm Management
+  </div>
+
+  <label
+    for="p-history"
+    class="plc"
+    aria-label="View farm history"
+  >
+    <div class="pli gr">📊</div>
+
+    <div class="plcn">
+      <div class="plct">Farm History</div>
+      <div class="plcs">
+        View crop, irrigation, fertilizer and farm activity
+      </div>
+    </div>
+
+    <span class="plb bs">
+      View
+    </span>
+
+  </label>
+
+</div>
+
+<!-- ===== FARM HISTORY ===== -->
+<div class="pg pg-history">
+
+  <div class="phdr">
+    <label
+      class="bbtn"
+      for="p-farm"
+      aria-label="Back"
+    >
+      ←
+    </label>
+
+    <div class="ptit">
+      Farm History 📊
+    </div>
+  </div>
+
+  <!-- SUMMARY -->
+  <div class="history-summary">
+
+    <div class="history-stat">
+      <div class="history-stat-icon">🌾</div>
+      <div
+        id="historyFarmCount"
+        class="history-stat-value"
+      >
+        1
+      </div>
+      <div class="history-stat-label">
+        Farms
+      </div>
+    </div>
+
+    <div class="history-stat">
+      <div class="history-stat-icon">📋</div>
+      <div
+        id="historyActivityCount"
+        class="history-stat-value"
+      >
+        0
+      </div>
+      <div class="history-stat-label">
+        Activities
+      </div>
+    </div>
+
+    <div class="history-stat">
+      <div class="history-stat-icon">🌱</div>
+      <div
+        id="historyCropCount"
+        class="history-stat-value"
+      >
+        1
+      </div>
+      <div class="history-stat-label">
+        Crops
+      </div>
+    </div>
+
+  </div>
+
+  <!-- FARM FILTER -->
+  <select
+    id="historyFarmFilter"
+    class="history-select"
+    onchange="renderFarmHistory()"
+  >
+    <option value="all">
+      All Farms
+    </option>
+  </select>
+
+  <!-- ACTIVITY FILTER -->
+  <div class="history-filters">
+
+    <button
+      class="history-filter active"
+      type="button"
+      data-history-filter="all"
+      onclick="setHistoryFilter('all',this)"
+    >
+      All
+    </button>
+
+    <button
+      class="history-filter"
+      type="button"
+      data-history-filter="crop"
+      onclick="setHistoryFilter('crop',this)"
+    >
+      🌱 Crop
+    </button>
+
+    <button
+      class="history-filter"
+      type="button"
+      data-history-filter="irrigation"
+      onclick="setHistoryFilter('irrigation',this)"
+    >
+      💧 Irrigation
+    </button>
+
+    <button
+      class="history-filter"
+      type="button"
+      data-history-filter="fertilizer"
+      onclick="setHistoryFilter('fertilizer',this)"
+    >
+      🧪 Fertilizer
+    </button>
+
+    <button
+      class="history-filter"
+      type="button"
+      data-history-filter="farm"
+      onclick="setHistoryFilter('farm',this)"
+    >
+      🌾 Farm
+    </button>
+
+  </div>
+
+  <!-- TIMELINE -->
+  <div
+    id="farmHistoryTimeline"
+    class="tl"
+  >
+  </div>
+
+  <button
+    class="history-clear"
+    type="button"
+    onclick="clearFarmHistory()"
+  >
+    🗑️ Clear Activity History
+  </button>
+
+</div>
+
+<!-- ===== KISANIQ AI ASSISTANT ===== -->
+<div class="pg pg-assistant">
+  <div class="phdr">
+    <label class="bbtn" for="p-home" aria-label="Back">←</label>
+    <div class="ptit">KisanIQ AI 🤖</div>
+  </div>
+
+  <div style="padding:4px 16px 8px">
+    <div style="
+      background:linear-gradient(135deg,#eef9f0,#f8fff9);
+      border:1px solid rgba(63,143,91,.12);
+      border-radius:16px;
+      padding:12px;
+      display:flex;
+      gap:10px;
+      align-items:center;
+    ">
+      <div style="
+        width:40px;
+        height:40px;
+        border-radius:50%;
+        background:linear-gradient(135deg,var(--g),var(--ok));
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        font-size:20px;
+      ">🤖</div>
+
+      <div>
+        <div style="font-size:13px;font-weight:800;color:var(--dt)">
+          KisanIQ
+        </div>
+        <div style="font-size:10px;color:var(--st)">
+          Your AI agricultural assistant
+        </div>
+      </div>
+
+      <div style="
+        margin-left:auto;
+        font-size:9px;
+        color:var(--ok);
+        font-weight:700;
+      ">
+        ● ONLINE
+      </div>
+    </div>
+  </div>
+
+  <!-- CHAT -->
+  <div id="kisanChat" style="
+    padding:8px 16px;
+    min-height:300px;
+    max-height:430px;
+    overflow-y:auto;
+  ">
+
+    <div class="cb cba">
+      <strong>Namaste! 🙏</strong><br>
+      I am KisanIQ, your agricultural assistant.
+      Ask me anything about your crop, soil, irrigation,
+      fertilizer, pests, diseases or farming practices.
+    </div>
+
+  </div>
+
+  <!-- QUICK QUESTIONS -->
+  <div style="
+    padding:0 16px 4px;
+    display:flex;
+    gap:6px;
+    overflow-x:auto;
+  ">
+    <button class="kq"
+      onclick="askKisan('My tomato leaves are turning yellow. What should I check?')">
+      🍅 Tomato problem
+    </button>
+
+    <button class="kq"
+      onclick="askKisan('Should I irrigate my tomato crop today?')">
+      💧 Irrigation
+    </button>
+
+    <button class="kq"
+      onclick="askKisan('What fertilizer is good for tomato flowering stage?')">
+      🧪 Fertilizer
+    </button>
+  </div>
+
+  <!-- INPUT -->
+  <div class="chat-input">
+    <input
+      id="kisanInput"
+      class="chat-input-field"
+      type="text"
+      placeholder="Ask KisanIQ anything..."
+      autocomplete="off"
+    >
+
+    <button
+      id="kisanSend"
+      class="chat-send"
+      onclick="sendKisanQuestion()"
+      aria-label="Send">
+      ➤
+    </button>
+  </div>
+</div>
+
+
+<style>
+/* KisanIQ assistant */
+.pg-assistant{
+  min-height:100%;
+  padding-bottom:10px;
+}
+
+.kq{
+  border:1px solid var(--lg);
+  background:#fff;
+  color:var(--dt);
+  border-radius:12px;
+  padding:7px 10px;
+  font-size:9px;
+  white-space:nowrap;
+  cursor:pointer;
+}
+
+.kq:active{
+  transform:scale(.96);
+  background:var(--vlg);
+}
+
+.ai-loading{
+  display:flex;
+  align-items:center;
+  gap:5px;
+}
+
+.ai-dot{
+  width:6px;
+  height:6px;
+  border-radius:50%;
+  background:var(--g);
+  animation:aiBounce .8s infinite alternate;
+}
+
+.ai-dot:nth-child(2){
+  animation-delay:.2s;
+}
+
+.ai-dot:nth-child(3){
+  animation-delay:.4s;
+}
+
+@keyframes aiBounce{
+  from{
+    opacity:.25;
+    transform:translateY(0);
+  }
+  to{
+    opacity:1;
+    transform:translateY(-4px);
+  }
+}
+</style>
+
+
+<script>
+const KISANIQ_API = "http://localhost:3000/api/ask";
+
+const kisanInput = document.getElementById("kisanInput");
+const kisanChat = document.getElementById("kisanChat");
+
+function addKisanMessage(message, type){
+
+  const bubble = document.createElement("div");
+
+  bubble.className =
+    type === "user"
+      ? "cb cbu"
+      : "cb cba";
+
+  bubble.innerHTML = message
+    .replace(/\n/g, "<br>");
+
+  kisanChat.appendChild(bubble);
+
+  kisanChat.scrollTop = kisanChat.scrollHeight;
+
+  return bubble;
+}
+
+
+function addLoadingMessage(){
+
+  const bubble = document.createElement("div");
+
+  bubble.className = "cb cba";
+
+  bubble.innerHTML = `
+    <div class="ai-loading">
+      <span class="ai-dot"></span>
+      <span class="ai-dot"></span>
+      <span class="ai-dot"></span>
+      <span style="margin-left:4px">
+        KisanIQ is thinking...
+      </span>
+    </div>
+  `;
+
+  kisanChat.appendChild(bubble);
+
+  kisanChat.scrollTop = kisanChat.scrollHeight;
+
+  return bubble;
+}
+
+
+async function sendKisanQuestion(){
+
+  const question = kisanInput.value.trim();
+
+  if(!question) return;
+
+  addKisanMessage(question, "user");
+
+  kisanInput.value = "";
+
+  const loading = addLoadingMessage();
+
+  try{
+
+    const response = await fetch(KISANIQ_API, {
+
+      method:"POST",
+
+      headers:{
+        "Content-Type":"application/json"
+      },
+
+      body:JSON.stringify({
+        question:question
+      })
+
+    });
+
+
+    const data = await response.json();
+
+    loading.remove();
+
+
+    if(!response.ok){
+
+      addKisanMessage(
+        "Sorry, I couldn't process that request. Please try again.",
+        "ai"
+      );
+
+      console.error(data);
+
+      return;
+    }
+
+
+    addKisanMessage(
+      data.answer || "I couldn't generate an answer.",
+      "ai"
+    );
+
+
+  }catch(error){
+
+    loading.remove();
+
+    addKisanMessage(
+      "⚠️ I can't connect to the KisanIQ AI server right now. Please make sure the Node.js server is running.",
+      "ai"
+    );
+
+    console.error(error);
+  }
+}
+
+
+function askKisan(question){
+
+  kisanInput.value = question;
+
+  sendKisanQuestion();
+
+}
+
+
+kisanInput.addEventListener("keydown", function(event){
+
+  if(event.key === "Enter"){
+
+    event.preventDefault();
+
+    sendKisanQuestion();
+
+  }
+
+});
+</script>
+<!-- ===== KISANIQ VOICE AI ===== -->
+<div class="pg pg-voice">
+
+  <div class="phdr">
+    <label class="bbtn" for="p-home" aria-label="Back">←</label>
+    <div class="ptit">KisanIQ Voice 🤖</div>
+  </div>
+
+  <div style="padding:8px 16px">
+
+    <!-- AI STATUS -->
+    <div style="
+      background:linear-gradient(135deg,#eef9f0,#f8fff9);
+      border:1px solid rgba(63,143,91,.12);
+      border-radius:16px;
+      padding:12px;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      margin-bottom:20px;
+    ">
+
+      <div style="
+        width:40px;
+        height:40px;
+        border-radius:50%;
+        background:linear-gradient(135deg,var(--g),var(--ok));
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        font-size:20px;
+      ">🤖</div>
+
+      <div>
+        <div style="font-size:13px;font-weight:800">
+          KisanIQ AI
+        </div>
+
+        <div style="font-size:10px;color:var(--st)">
+          Voice agricultural assistant
+        </div>
+      </div>
+
+      <div style="
+        margin-left:auto;
+        color:var(--ok);
+        font-size:9px;
+        font-weight:700;
+      ">
+        ● AI ONLINE
+      </div>
+
+    </div>
+
+
+    <!-- MICROPHONE -->
+    <div style="text-align:center;padding:25px 0">
+
+      <button
+        id="voiceMic"
+        onclick="toggleKisanVoice()"
+        style="
+          width:105px;
+          height:105px;
+          border-radius:50%;
+          border:none;
+          background:linear-gradient(135deg,var(--g),var(--ok));
+          color:white;
+          font-size:38px;
+          cursor:pointer;
+          box-shadow:0 10px 35px rgba(63,143,91,.30);
+          transition:.2s;
+        "
+      >
+        🎤
+      </button>
+
+      <div
+        id="voiceStatus"
+        style="
+          margin-top:16px;
+          font-size:14px;
+          font-weight:700;
+        "
+      >
+        Tap the microphone
+      </div>
+
+      <div
+        id="voiceHint"
+        style="
+          margin-top:5px;
+          font-size:10px;
+          color:var(--st);
+        "
+      >
+        Speak in English or Hindi
+      </div>
+
+    </div>
+
+
+    <!-- WHAT I HEARD -->
+    <div
+      id="voiceQuestionBox"
+      style="
+        display:none;
+        background:#fff;
+        border-radius:15px;
+        padding:14px;
+        box-shadow:var(--sh);
+        margin-bottom:12px;
+      "
+    >
+
+      <div style="
+        font-size:10px;
+        color:var(--st);
+        margin-bottom:5px;
+      ">
+        YOU SAID
+      </div>
+
+      <div
+        id="voiceQuestion"
+        style="
+          font-size:13px;
+          line-height:1.5;
+          font-weight:600;
+        "
+      ></div>
+
+    </div>
+
+
+    <!-- AI ANSWER -->
+    <div
+      id="voiceAnswerBox"
+      style="
+        display:none;
+        background:linear-gradient(135deg,#f8fdf5,#fff);
+        border:1px solid rgba(63,143,91,.10);
+        border-radius:15px;
+        padding:14px;
+        box-shadow:var(--sh);
+      "
+    >
+
+      <div style="
+        font-size:10px;
+        color:var(--g);
+        font-weight:700;
+        margin-bottom:7px;
+      ">
+        🤖 KISANIQ AI
+      </div>
+
+      <div
+        id="voiceAnswer"
+        style="
+          font-size:12px;
+          line-height:1.6;
+        "
+      ></div>
+
+    </div>
+
+
+    <!-- QUICK QUESTIONS -->
+    <div class="sec" style="margin-top:20px">
+      Try asking
+    </div>
+
+    <div style="
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+    ">
+
+      <button
+        class="vch"
+        onclick="voiceQuickQuestion('Should I irrigate my tomato crop today?')"
+      >
+        💧 Should I irrigate my tomato crop today?
+      </button>
+
+      <button
+        class="vch"
+        onclick="voiceQuickQuestion('My tomato leaves are turning yellow. What should I do?')"
+      >
+        🍅 My tomato leaves are turning yellow.
+      </button>
+
+      <button
+        class="vch"
+        onclick="voiceQuickQuestion('What fertilizer should I use during tomato flowering?')"
+      >
+        🧪 What fertilizer should I use?
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<style>
+
+#voiceMic.listening{
+  animation:voicePulse 1.2s infinite;
+  background:linear-gradient(135deg,#e85d5d,#d93636);
+}
+
+@keyframes voicePulse{
+
+  0%{
+    transform:scale(1);
+    box-shadow:0 10px 35px rgba(232,93,93,.25);
+  }
+
+  50%{
+    transform:scale(1.08);
+    box-shadow:0 10px 50px rgba(232,93,93,.55);
+  }
+
+  100%{
+    transform:scale(1);
+    box-shadow:0 10px 35px rgba(232,93,93,.25);
+  }
+
+}
+
+/* =========================================================
+   KISANIQ - ENHANCED FARM MANAGEMENT
+   Keeps existing UI / UX style
+   ========================================================= */
+
+.farm-actions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+  padding:0 16px;
+  margin:8px 0 12px;
+}
+
+.farm-action{
+  background:#fff;
+  border:none;
+  border-radius:14px;
+  padding:11px 8px;
+  box-shadow:var(--sh);
+  color:var(--dt);
+  font-size:10px;
+  font-weight:700;
+  cursor:pointer;
+  transition:transform .15s,background .15s;
+}
+
+.farm-action:active{
+  transform:scale(.95);
+}
+
+.farm-action.primary{
+  background:linear-gradient(135deg,var(--g),var(--ok));
+  color:#fff;
+}
+
+.farm-action.danger{
+  color:var(--bad);
+}
+
+.farm-action.full{
+  grid-column:1/-1;
+}
+
+.farm-list{
+  padding:0 16px;
+}
+
+.farm-item{
+  background:#fff;
+  border-radius:16px;
+  padding:14px;
+  margin-bottom:8px;
+  box-shadow:var(--sh);
+  display:flex;
+  align-items:center;
+  gap:10px;
+  cursor:pointer;
+  transition:transform .15s;
+}
+
+.farm-item:active{
+  transform:scale(.97);
+}
+
+.farm-item-icon{
+  width:38px;
+  height:38px;
+  border-radius:12px;
+  background:var(--lg);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:19px;
+  flex-shrink:0;
+}
+
+.farm-item-info{
+  flex:1;
+  min-width:0;
+}
+
+.farm-item-name{
+  font-size:12px;
+  font-weight:700;
+}
+
+.farm-item-details{
+  font-size:9px;
+  color:var(--st);
+  margin-top:2px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.farm-active{
+  font-size:8px;
+  font-weight:700;
+  color:var(--g);
+  background:var(--lg);
+  padding:4px 7px;
+  border-radius:8px;
+}
+
+.farm-form{
+  margin:0 16px 12px;
+  background:#fff;
+  border-radius:18px;
+  padding:16px;
+  box-shadow:var(--sh);
+}
+
+.farm-form-title{
+  font-size:13px;
+  font-weight:700;
+  margin-bottom:12px;
+}
+
+.farm-field{
+  margin-bottom:10px;
+}
+
+.farm-field label{
+  display:block;
+  font-size:9px;
+  color:var(--st);
+  font-weight:600;
+  margin-bottom:4px;
+}
+
+.farm-field input,
+.farm-field select{
+  width:100%;
+  padding:11px 12px;
+  border:2px solid var(--lg);
+  border-radius:12px;
+  background:#fff;
+  color:var(--dt);
+  font-family:inherit;
+  font-size:11px;
+  outline:none;
+}
+
+.farm-field input:focus,
+.farm-field select:focus{
+  border-color:var(--g);
+}
+
+.farm-empty{
+  margin:8px 16px;
+  padding:24px 16px;
+  background:#fff;
+  border-radius:18px;
+  box-shadow:var(--sh);
+  text-align:center;
+}
+
+.farm-empty-icon{
+  font-size:34px;
+  margin-bottom:8px;
+}
+
+.farm-empty-title{
+  font-size:13px;
+  font-weight:700;
+}
+
+.farm-empty-text{
+  font-size:10px;
+  color:var(--st);
+  margin-top:4px;
+  line-height:1.5;
+}
+
+/* ===== HISTORY ===== */
+
+.history-summary{
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  gap:8px;
+  padding:0 16px;
+  margin-bottom:10px;
+}
+
+.history-stat{
+  background:#fff;
+  border-radius:14px;
+  padding:12px 8px;
+  text-align:center;
+  box-shadow:var(--sh);
+}
+
+.history-stat-icon{
+  font-size:18px;
+}
+
+.history-stat-value{
+  font-size:16px;
+  font-weight:800;
+  margin-top:2px;
+}
+
+.history-stat-label{
+  font-size:8px;
+  color:var(--st);
+  margin-top:2px;
+}
+
+.history-filters{
+  display:flex;
+  gap:6px;
+  padding:0 16px 8px;
+  overflow-x:auto;
+  scrollbar-width:none;
+}
+
+.history-filters::-webkit-scrollbar{
+  display:none;
+}
+
+.history-filter{
+  border:none;
+  background:#fff;
+  color:var(--st);
+  padding:8px 11px;
+  border-radius:12px;
+  box-shadow:var(--sh);
+  font-size:9px;
+  font-weight:700;
+  white-space:nowrap;
+  cursor:pointer;
+}
+
+.history-filter.active{
+  background:var(--g);
+  color:#fff;
+}
+
+.history-select{
+  margin:0 16px 10px;
+  width:calc(100% - 32px);
+  padding:10px 12px;
+  border:2px solid var(--lg);
+  border-radius:12px;
+  background:#fff;
+  color:var(--dt);
+  font-family:inherit;
+  font-size:10px;
+  outline:none;
+}
+
+.history-empty{
+  margin:8px 16px;
+  background:#fff;
+  border-radius:16px;
+  padding:25px 16px;
+  text-align:center;
+  box-shadow:var(--sh);
+  color:var(--st);
+  font-size:10px;
+}
+
+.history-clear{
+  margin:8px 16px 16px;
+  width:calc(100% - 32px);
+  background:#fff;
+  color:var(--bad);
+  border:1px solid #FDEAEA;
+  border-radius:12px;
+  padding:10px;
+  font-size:10px;
+  font-weight:700;
+  cursor:pointer;
+}
+
+.history-clear:active{
+  transform:scale(.97);
+}
+
+@media(max-width:370px){
+  .history-summary{
+    gap:6px;
+  }
+
+  .history-stat{
+    padding:10px 5px;
+  }
+
+  .farm-action{
+    padding:10px 6px;
+  }
+}
+
+</style>
+
+
+<script>
+
+const KISANIQ_VOICE_API = "http://localhost:3000/api/ask";
+
+let kisanRecognition = null;
+let isListening = false;
+
+
+/* ==============================
+   SPEECH RECOGNITION
+============================== */
+
+function setupVoiceRecognition(){
+
+  const SpeechRecognition =
+    window.SpeechRecognition ||
+    window.webkitSpeechRecognition;
+
+  if(!SpeechRecognition){
+
+    document.getElementById("voiceStatus").innerText =
+      "Voice recognition not supported";
+
+    document.getElementById("voiceHint").innerText =
+      "Please use Google Chrome";
+
+    return null;
+  }
+
+
+  const recognition = new SpeechRecognition();
+
+  recognition.continuous = false;
+
+  recognition.interimResults = false;
+
+  recognition.lang = "en-IN";
+
+
+  recognition.onstart = function(){
+
+    isListening = true;
+
+    document
+      .getElementById("voiceMic")
+      .classList.add("listening");
+
+    document.getElementById("voiceStatus").innerText =
+      "Listening... 🎙️";
+
+    document.getElementById("voiceHint").innerText =
+      "Speak your farming question";
+  };
+
+
+  recognition.onresult = function(event){
+
+    const transcript =
+      event.results[0][0].transcript;
+
+    document.getElementById("voiceQuestionBox")
+      .style.display = "block";
+
+    document.getElementById("voiceQuestion")
+      .innerText = transcript;
+
+    askKisanVoice(transcript);
+  };
+
+
+  recognition.onerror = function(event){
+
+    console.error("Speech error:",event.error);
+
+    document.getElementById("voiceStatus").innerText =
+      "Couldn't hear you";
+
+    resetVoiceButton();
+  };
+
+
+  recognition.onend = function(){
+
+    resetVoiceButton();
+  };
+
+
+  return recognition;
+}
+
+
+/* ==============================
+   MICROPHONE
+============================== */
+
+function toggleKisanVoice(){
+
+  if(!kisanRecognition){
+
+    kisanRecognition =
+      setupVoiceRecognition();
+  }
+
+  if(!kisanRecognition) return;
+
+
+  if(isListening){
+
+    kisanRecognition.stop();
+
+    return;
+  }
+
+
+  document.getElementById("voiceAnswerBox")
+    .style.display = "none";
+
+
+  try{
+
+    kisanRecognition.start();
+
+  }catch(error){
+
+    console.log(error);
+
+  }
+
+}
+
+
+function resetVoiceButton(){
+
+  isListening = false;
+
+  document
+    .getElementById("voiceMic")
+    .classList.remove("listening");
+
+  document.getElementById("voiceStatus").innerText =
+    "Tap the microphone";
+
+  document.getElementById("voiceHint").innerText =
+    "Speak in English or Hindi";
+}
+
+
+/* ==============================
+   SEND TO GEMINI
+============================== */
+
+async function askKisanVoice(question){
+
+  document.getElementById("voiceStatus").innerText =
+    "KisanIQ is thinking... 🤖";
+
+
+  try{
+
+    const response = await fetch(
+      KISANIQ_VOICE_API,
+      {
+        method:"POST",
+
+        headers:{
+          "Content-Type":"application/json"
+        },
+
+        body:JSON.stringify({
+          question:question
+        })
+      }
+    );
+
+
+    const data = await response.json();
+
+
+    if(!response.ok){
+
+      throw new Error(
+        data.error || "AI request failed"
+      );
+
+    }
+
+
+    const answer =
+      data.answer ||
+      "Sorry, I couldn't generate an answer.";
+
+
+    document.getElementById("voiceAnswerBox")
+      .style.display = "block";
+
+    document.getElementById("voiceAnswer")
+      .innerText = answer;
+
+
+    document.getElementById("voiceStatus").innerText =
+      "Answer ready 🌾";
+
+
+    /* Speak AI answer */
+    speakKisanAnswer(answer);
+
+
+  }catch(error){
+
+    console.error(error);
+
+    document.getElementById("voiceAnswerBox")
+      .style.display = "block";
+
+    document.getElementById("voiceAnswer")
+      .innerText =
+        "⚠️ I couldn't connect to KisanIQ AI. Make sure the Node.js server is running.";
+
+    document.getElementById("voiceStatus").innerText =
+      "Connection problem";
+  }
+
+}
+
+
+/* ==============================
+   TEXT → SPEECH
+============================== */
+
+function speakKisanAnswer(text){
+
+  if(!("speechSynthesis" in window))
+    return;
+
+
+  window.speechSynthesis.cancel();
+
+
+  const speech =
+    new SpeechSynthesisUtterance(text);
+
+  speech.lang = "en-IN";
+
+  speech.rate = 0.92;
+
+  speech.pitch = 1;
+
+
+  window.speechSynthesis.speak(speech);
+
+}
+
+
+/* ==============================
+   QUICK QUESTIONS
+============================== */
+
+function voiceQuickQuestion(question){
+
+  document.getElementById("voiceQuestionBox")
+    .style.display = "block";
+
+  document.getElementById("voiceQuestion")
+    .innerText = question;
+
+  askKisanVoice(question);
+
+}
+
+</script>
+
+<script>
+
+async function analyzeCropImage(event) {
+
+  const file = event.target.files[0];
+
+  if (!file) return;
+
+  if (!file.type.startsWith("image/")) {
+    alert("Please select a valid image.");
+    return;
+  }
+
+  const scanBox =
+    document.querySelector(".pg-crop .scan-idle");
+
+  if (scanBox) {
+
+    scanBox.innerHTML = `
+      <div class="upa">
+
+        <div class="upi">🤖</div>
+
+        <div class="upt">
+          KisanIQ is analyzing...
+        </div>
+
+        <div class="ups">
+          AI is examining your crop
+        </div>
+
+      </div>
+    `;
+
+  }
+
+  try {
+
+    const base64 =
+      await cropFileToBase64(file);
+
+    const imageData =
+      base64.split(",")[1];
+
+
+    const response = await fetch(
+      "http://localhost:3000/api/analyze-crop",
+      {
+        method: "POST",
+
+        headers: {
+          "Content-Type": "application/json"
+        },
+
+        body: JSON.stringify({
+          image: imageData,
+          mimeType: file.type
+        })
+      }
+    );
+
+
+    const data =
+      await response.json();
+
+
+    if (!response.ok) {
+
+      throw new Error(
+        data.error ||
+        "Crop analysis failed"
+      );
+
+    }
+
+
+    showCropAIResult(
+      data.analysis,
+      base64
+    );
+
+
+  } catch (error) {
+
+    console.error(
+      "Crop Doctor error:",
+      error
+    );
+
+    alert(
+      "⚠️ Crop analysis failed.\n\n" +
+      error.message
+    );
+
+    location.reload();
+
+  }
+
+}
+
+
+function cropFileToBase64(file) {
+
+  return new Promise(
+    (resolve, reject) => {
+
+      const reader =
+        new FileReader();
+
+      reader.onload =
+        () => resolve(reader.result);
+
+      reader.onerror =
+        () => reject(
+          new Error("Could not read image")
+        );
+
+      reader.readAsDataURL(file);
+
+    }
+  );
+
+}
+
+
+function showCropAIResult(
+  analysis,
+  imageData
+) {
+
+  const cropPage =
+    document.querySelector(".pg-crop");
+
+  if (!cropPage) return;
+
+
+  cropPage.innerHTML = `
+
+    <div class="phdr">
+
+      <label
+        class="bbtn"
+        for="p-home"
+        aria-label="Back"
+      >
+        ←
+      </label>
+
+      <div class="ptit">
+        Crop Doctor 🌱
+      </div>
+
+    </div>
+
+
+    <div style="
+      padding:0 16px 20px;
+    ">
+
+      <div style="
+        background:#fff;
+        border-radius:20px;
+        padding:16px;
+        box-shadow:var(--sh);
+        margin-bottom:12px;
+      ">
+
+        <div style="
+          color:var(--ok);
+          font-size:11px;
+          font-weight:800;
+          margin-bottom:10px;
+        ">
+          ✓ AI ANALYSIS COMPLETE
+        </div>
+
+
+        <img
+          src="${imageData}"
+          alt="Crop photo"
+          style="
+            width:100%;
+            height:210px;
+            object-fit:cover;
+            border-radius:14px;
+            margin-bottom:14px;
+          "
+        >
+
+
+        <div style="
+          font-size:12px;
+          line-height:1.7;
+          white-space:pre-wrap;
+        ">
+          ${escapeCropText(analysis)}
+        </div>
+
+      </div>
+
+
+      <button
+        class="cta"
+        onclick="location.reload()"
+        style="
+          width:100%;
+          border:none;
+          cursor:pointer;
+        "
+      >
+        📷 Scan Another Crop
+      </button>
+
+    </div>
+
+  `;
+
+}
+
+
+function escapeCropText(text) {
+
+  return String(text)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+
+}
+
+/* =========================================================
+   KISANIQ FARM MANAGEMENT
+   ========================================================= */
+
+const FARM_STORAGE_KEY = "kisaniq_farms_v1";
+const HISTORY_STORAGE_KEY = "kisaniq_history_v1";
+
+let editingFarmId = null;
+let activeHistoryFilter = "all";
+
+
+/* =========================================================
+   DEFAULT FARM
+   ========================================================= */
+
+function getDefaultFarms(){
+
+  return [
+    {
+      id: "farm_01",
+      name: "Farm 01",
+      area: "2.5",
+      crop: "Tomato",
+      location: "Nadia, West Bengal",
+      stage: "Flowering",
+      active: true,
+      createdAt: new Date().toISOString()
+    }
+  ];
+
+}
+
+
+/* =========================================================
+   FARM DATA
+   ========================================================= */
+
+function getFarms(){
+
+  try{
+
+    const saved =
+      localStorage.getItem(FARM_STORAGE_KEY);
+
+    if(saved){
+
+      const farms = JSON.parse(saved);
+
+      if(Array.isArray(farms) && farms.length){
+        return farms;
+      }
+
+    }
+
+  }catch(error){
+
+    console.error(
+      "Farm data error:",
+      error
+    );
+
+  }
+
+  const defaults = getDefaultFarms();
+
+  localStorage.setItem(
+    FARM_STORAGE_KEY,
+    JSON.stringify(defaults)
+  );
+
+  return defaults;
+
+}
+
+
+function saveFarms(farms){
+
+  localStorage.setItem(
+    FARM_STORAGE_KEY,
+    JSON.stringify(farms)
+  );
+
+}
+
+
+function getActiveFarm(){
+
+  const farms = getFarms();
+
+  return (
+    farms.find(farm => farm.active) ||
+    farms[0] ||
+    null
+  );
+
+}
+
+
+/* =========================================================
+   HISTORY DATA
+   ========================================================= */
+
+function getHistory(){
+
+  try{
+
+    const saved =
+      localStorage.getItem(HISTORY_STORAGE_KEY);
+
+    if(saved){
+
+      const history = JSON.parse(saved);
+
+      if(Array.isArray(history)){
+        return history;
+      }
+
+    }
+
+  }catch(error){
+
+    console.error(
+      "History data error:",
+      error
+    );
+
+  }
+
+  return [];
+
+}
+
+
+function saveHistory(history){
+
+  localStorage.setItem(
+    HISTORY_STORAGE_KEY,
+    JSON.stringify(history)
+  );
+
+}
+
+
+function addFarmHistory(
+  type,
+  title,
+  description,
+  farmId
+){
+
+  const history = getHistory();
+
+  history.unshift({
+
+    id:
+      "history_" +
+      Date.now() +
+      "_" +
+      Math.random()
+        .toString(36)
+        .slice(2),
+
+    type: type,
+
+    title: title,
+
+    description: description,
+
+    farmId: farmId || null,
+
+    date: new Date().toISOString()
+
+  });
+
+  /* Keep the latest 100 activities */
+
+  saveHistory(
+    history.slice(0,100)
+  );
+
+}
+
+
+/* =========================================================
+   FARM PAGE
+   ========================================================= */
+
+function renderFarmPage(){
+
+  const farms = getFarms();
+
+  const activeFarm = getActiveFarm();
+
+  const container =
+    document.getElementById(
+      "activeFarmContainer"
+    );
+
+  if(!container) return;
+
+
+  if(!activeFarm){
+
+    container.innerHTML = `
+
+      <div class="farm-empty">
+
+        <div class="farm-empty-icon">
+          🌾
+        </div>
+
+        <div class="farm-empty-title">
+          No farm added
+        </div>
+
+        <div class="farm-empty-text">
+          Add your first farm to manage
+          crops, irrigation and farm activities.
+        </div>
+
+      </div>
+
+    `;
+
+  }else{
+
+    const stageEmoji =
+      getStageEmoji(
+        activeFarm.stage
+      );
+
+    container.innerHTML = `
+
+      <div class="fmc an">
+
+        <div style="
+          font-size:15px;
+          font-weight:700;
+          margin-bottom:3px
+        ">
+          ${escapeFarmText(activeFarm.name)}
+        </div>
+
+        <div style="
+          font-size:12px;
+          color:var(--st)
+        ">
+          ${escapeFarmText(activeFarm.area)}
+          acres •
+          ${escapeFarmText(activeFarm.crop)}
+          •
+          ${escapeFarmText(activeFarm.stage)}
+          stage
+        </div>
+
+        <div style="
+          margin-top:8px;
+          display:flex;
+          gap:6px;
+          flex-wrap:wrap
+        ">
+
+          <span style="
+            font-size:9px;
+            background:var(--lg);
+            color:var(--g);
+            padding:3px 7px;
+            border-radius:6px;
+            font-weight:600
+          ">
+            ${stageEmoji}
+            ${escapeFarmText(activeFarm.stage)}
+          </span>
+
+          <span style="
+            font-size:9px;
+            background:var(--lb);
+            color:#2B8BB5;
+            padding:3px 7px;
+            border-radius:6px;
+            font-weight:600
+          ">
+            📍
+            ${escapeFarmText(activeFarm.location)}
+          </span>
+
+          <span style="
+            font-size:9px;
+            background:#fff3cd;
+            color:#8a6d3b;
+            padding:3px 7px;
+            border-radius:6px;
+            font-weight:600
+          ">
+            ⭐ Active
+          </span>
+
+        </div>
+
+      </div>
+
+    `;
+
+  }
+
+
+  renderFarmList();
+
+  updateHomeFarmCard();
+
+  updateHistoryFarmFilter();
+
+  refreshFarmRecommendations();
+
+}
+
+
+/* =========================================================
+   FARM LIST
+   ========================================================= */
+
+function renderFarmList(){
+
+  const list =
+    document.getElementById(
+      "farmList"
+    );
+
+  if(!list) return;
+
+  const farms = getFarms();
+
+  if(!farms.length){
+
+    list.innerHTML = `
+
+      <div class="farm-empty">
+
+        <div class="farm-empty-icon">
+          🌱
+        </div>
+
+        <div class="farm-empty-title">
+          No farms yet
+        </div>
+
+        <div class="farm-empty-text">
+          Tap Add Farm to create your farm profile.
+        </div>
+
+      </div>
+
+    `;
+
+    return;
+
+  }
+
+
+  list.innerHTML =
+    farms.map(farm => `
+
+      <div
+        class="farm-item"
+        onclick="selectFarm('${farm.id}')"
+      >
+
+        <div class="farm-item-icon">
+          ${getStageEmoji(farm.stage)}
+        </div>
+
+        <div class="farm-item-info">
+
+          <div class="farm-item-name">
+            ${escapeFarmText(farm.name)}
+          </div>
+
+          <div class="farm-item-details">
+            ${escapeFarmText(farm.area)}
+            acres •
+            ${escapeFarmText(farm.crop)}
+            •
+            ${escapeFarmText(farm.location)}
+          </div>
+
+        </div>
+
+        ${
+          farm.active
+          ?
+          `<span class="farm-active">ACTIVE</span>`
+          :
+          `<span style="
+             font-size:8px;
+             color:var(--st);
+             font-weight:600;
+           ">
+             Tap to activate
+           </span>`
+        }
+
+      </div>
+
+    `).join("");
+
+}
+
+
+/* =========================================================
+   ADD FARM
+   ========================================================= */
+
+function showFarmForm(){
+
+  editingFarmId = null;
+
+  const form =
+    document.getElementById(
+      "farmFormContainer"
+    );
+
+  if(!form) return;
+
+  document.getElementById(
+    "farmFormTitle"
+  ).innerText =
+    "Add New Farm";
+
+  clearFarmForm();
+
+  form.style.display = "block";
+
+  form.scrollIntoView({
+    behavior:"smooth",
+    block:"center"
+  });
+
+}
+
+
+function hideFarmForm(){
+
+  const form =
+    document.getElementById(
+      "farmFormContainer"
+    );
+
+  if(form){
+    form.style.display = "none";
+  }
+
+  editingFarmId = null;
+
+}
+
+
+function clearFarmForm(){
+
+  document.getElementById(
+    "farmNameInput"
+  ).value = "";
+
+  document.getElementById(
+    "farmAreaInput"
+  ).value = "";
+
+  document.getElementById(
+    "farmCropInput"
+  ).value = "";
+
+  document.getElementById(
+    "farmLocationInput"
+  ).value = "";
+
+  document.getElementById(
+    "farmStageInput"
+  ).value = "Flowering";
+
+}
+
+
+/* =========================================================
+   EDIT FARM
+   ========================================================= */
+
+function editActiveFarm(){
+
+  const farm =
+    getActiveFarm();
+
+  if(!farm){
+
+    alert(
+      "Please add a farm first."
+    );
+
+    return;
+
+  }
+
+  editingFarmId =
+    farm.id;
+
+  document.getElementById(
+    "farmFormTitle"
+  ).innerText =
+    "Edit Farm";
+
+  document.getElementById(
+    "farmNameInput"
+  ).value =
+    farm.name;
+
+  document.getElementById(
+    "farmAreaInput"
+  ).value =
+    farm.area;
+
+  document.getElementById(
+    "farmCropInput"
+  ).value =
+    farm.crop;
+
+  document.getElementById(
+    "farmLocationInput"
+  ).value =
+    farm.location;
+
+  document.getElementById(
+    "farmStageInput"
+  ).value =
+    farm.stage;
+
+  const form =
+    document.getElementById(
+      "farmFormContainer"
+    );
+
+  form.style.display =
+    "block";
+
+  form.scrollIntoView({
+    behavior:"smooth",
+    block:"center"
+  });
+
+}
+
+
+/* =========================================================
+   SAVE FARM
+   ========================================================= */
+
+function saveFarm(){
+
+  const name =
+    document.getElementById(
+      "farmNameInput"
+    ).value.trim();
+
+  const area =
+    document.getElementById(
+      "farmAreaInput"
+    ).value.trim();
+
+  const crop =
+    document.getElementById(
+      "farmCropInput"
+    ).value.trim();
+
+  const location =
+    document.getElementById(
+      "farmLocationInput"
+    ).value.trim();
+
+  const stage =
+    document.getElementById(
+      "farmStageInput"
+    ).value;
+
+
+  if(!name){
+
+    alert(
+      "Please enter the farm name."
+    );
+
+    return;
+
+  }
+
+  if(!area || Number(area) <= 0){
+
+    alert(
+      "Please enter a valid farm area."
+    );
+
+    return;
+
+  }
+
+  if(!crop){
+
+    alert(
+      "Please enter the crop."
+    );
+
+    return;
+
+  }
+
+  if(!location){
+
+    alert(
+      "Please enter the farm location."
+    );
+
+    return;
+
+  }
+
+
+  const farms =
+    getFarms();
+
+
+  /* EDIT EXISTING FARM */
+
+  if(editingFarmId){
+
+    const farm =
+      farms.find(
+        item =>
+          item.id === editingFarmId
+      );
+
+    if(farm){
+
+      farm.name = name;
+      farm.area = area;
+      farm.crop = crop;
+      farm.location = location;
+      farm.stage = stage;
+
+      addFarmHistory(
+        "farm",
+        "Farm updated",
+        `${name} details were updated.`,
+        farm.id
+      );
+
+    }
+
+  }
+
+  /* ADD NEW FARM */
+
+  else{
+
+    const newFarm = {
+
+      id:
+        "farm_" +
+        Date.now(),
+
+      name:name,
+
+      area:area,
+
+      crop:crop,
+
+      location:location,
+
+      stage:stage,
+
+      active:
+        farms.length === 0,
+
+      createdAt:
+        new Date().toISOString()
+
+    };
+
+
+    farms.push(
+      newFarm
+    );
+
+
+    addFarmHistory(
+      "farm",
+      "Farm added",
+      `${name} was added to KisanIQ.`,
+      newFarm.id
+    );
+
+  }
+
+
+  saveFarms(
+    farms
+  );
+
+  hideFarmForm();
+
+  renderFarmPage();
+
+  renderFarmHistory();
+ 
+  refreshFarmRecommendations();
+
+}
+
+
+/* =========================================================
+   SWITCH ACTIVE FARM
+   ========================================================= */
+
+function selectFarm(id){
+
+  const farms =
+    getFarms();
+
+  const selected =
+    farms.find(
+      farm => farm.id === id
+    );
+
+  if(!selected) return;
+
+
+  farms.forEach(
+    farm => {
+      farm.active =
+        farm.id === id;
+    }
+  );
+
+
+  saveFarms(
+    farms
+  );
+
+
+  addFarmHistory(
+    "farm",
+    "Active farm changed",
+    `${selected.name} is now the active farm.`,
+    selected.id
+  );
+
+
+  renderFarmPage();
+
+  renderFarmHistory();
+
+}
+
+
+function setActiveFarmFromList(){
+
+  const farms =
+    getFarms();
+
+  if(farms.length <= 1){
+
+    alert(
+      "Add another farm to switch between farms."
+    );
+
+    return;
+
+  }
+
+  const names =
+    farms.map(
+      (farm,index) =>
+        `${index + 1}. ${farm.name}`
+    ).join("\n");
+
+
+  const choice =
+    prompt(
+      "Enter the farm number to activate:\n\n" +
+      names
+    );
+
+
+  if(choice === null) return;
+
+
+  const index =
+    Number(choice) - 1;
+
+
+  if(
+    Number.isNaN(index) ||
+    index < 0 ||
+    index >= farms.length
+  ){
+
+    alert(
+      "Invalid farm number."
+    );
+
+    return;
+
+  }
+
+
+  selectFarm(
+    farms[index].id
+  );
+
+}
+
+
+/* =========================================================
+   REMOVE FARM
+   ========================================================= */
+
+function removeActiveFarm(){
+
+  const farm =
+    getActiveFarm();
+
+  if(!farm){
+
+    alert(
+      "There is no farm to remove."
+    );
+
+    return;
+
+  }
+
+
+  const farms =
+    getFarms();
+
+
+  if(farms.length === 1){
+
+    const confirmLast =
+      confirm(
+        "This is your only farm. Remove it?\n\n" +
+        "Your farm history will be kept."
+      );
+
+    if(!confirmLast)
+      return;
+
+  }else{
+
+    const confirmRemove =
+      confirm(
+        `Remove ${farm.name} from KisanIQ?\n\n` +
+        `The farm will be removed from your active farm list.`
+      );
+
+    if(!confirmRemove)
+      return;
+
+  }
+
+
+  const removedId =
+    farm.id;
+
+
+  const remaining =
+    farms.filter(
+      item =>
+        item.id !== removedId
+    );
+
+
+  if(remaining.length){
+
+    remaining[0].active =
+      true;
+
+  }
+
+
+  saveFarms(
+    remaining
+  );
+
+
+  addFarmHistory(
+    "farm",
+    "Farm removed",
+    `${farm.name} was removed from your farm list.`,
+    removedId
+  );
+
+
+  renderFarmPage();
+
+  renderFarmHistory();
+
+}
+
+
+/* =========================================================
+   HOME CARD
+   ========================================================= */
+
+function updateHomeFarmCard(){
+
+  const activeFarm =
+    getActiveFarm();
+
+  const card =
+    document.querySelector(
+      '.fc.gt[for="p-farm"]'
+    );
+
+  if(!card) return;
+
+
+  const title =
+    card.querySelector(
+      ".fct"
+    );
+
+  const desc =
+    card.querySelector(
+      ".fcd"
+    );
+
+
+  if(!activeFarm){
+
+    if(title)
+      title.innerText =
+        "My Farm";
+
+    if(desc)
+      desc.innerText =
+        "No farm added";
+
+    return;
+
+  }
+
+
+  if(title)
+    title.innerText =
+      activeFarm.name;
+
+  if(desc)
+    desc.innerText =
+      `${activeFarm.area} acres • ${activeFarm.crop}`;
+
+}
+
+
+/* =========================================================
+   FARM HISTORY
+   ========================================================= */
+
+function renderFarmHistory(){
+
+  const timeline =
+    document.getElementById(
+      "farmHistoryTimeline"
+    );
+
+  if(!timeline) return;
+
+
+  const history =
+    getHistory();
+
+  const farmFilter =
+    document.getElementById(
+      "historyFarmFilter"
+    );
+
+
+  const selectedFarm =
+    farmFilter
+      ? farmFilter.value
+      : "all";
+
+
+  let filtered =
+    history.filter(
+      item => {
+
+        const farmMatch =
+          selectedFarm === "all" ||
+          item.farmId === selectedFarm;
+
+        const typeMatch =
+          activeHistoryFilter === "all" ||
+          item.type === activeHistoryFilter;
+
+        return (
+          farmMatch &&
+          typeMatch
+        );
+
+      }
+    );
+
+
+  updateHistoryStats();
+
+  if(!filtered.length){
+
+    timeline.innerHTML = `
+
+      <div class="history-empty">
+
+        📋
+
+        <br><br>
+
+        No activities found for this filter.
+
+      </div>
+
+    `;
+
+    return;
+
+  }
+
+
+  const groups = {};
+
+
+  filtered.forEach(
+    item => {
+
+      const date =
+        new Date(item.date);
+
+      const key =
+        date.toLocaleDateString(
+          "en-IN",
+          {
+            day:"2-digit",
+            month:"short",
+            year:"numeric"
+          }
+        );
+
+
+      if(!groups[key]){
+        groups[key] = [];
+      }
+
+      groups[key].push(
+        item
+      );
+
+    }
+  );
+
+
+  timeline.innerHTML =
+    Object.entries(groups)
+      .map(
+        ([date,items]) => `
+
+          <div class="tld">
+            ${date}
+          </div>
+
+          ${
+            items.map(
+              item => {
+
+                const time =
+                  new Date(
+                    item.date
+                  ).toLocaleTimeString(
+                    "en-IN",
+                    {
+                      hour:"2-digit",
+                      minute:"2-digit"
+                    }
+                  );
+
+
+                return `
+
+                  <div class="tli">
+
+                    <div class="tlt">
+                      ${time}
+                    </div>
+
+                    <div class="tlc">
+
+                      <div class="tltt">
+                        ${getHistoryIcon(item.type)}
+                        ${escapeFarmText(item.title)}
+                      </div>
+
+                      <div class="tlds">
+                        ${escapeFarmText(item.description)}
+                      </div>
+
+                    </div>
+
+                  </div>
+
+                `;
+
+              }
+            ).join("")
+          }
+
+        `
+      ).join("");
+
+}
+
+
+/* =========================================================
+   HISTORY FILTER
+   ========================================================= */
+
+function setHistoryFilter(
+  filter,
+  button
+){
+
+  activeHistoryFilter =
+    filter;
+
+
+  document
+    .querySelectorAll(
+      ".history-filter"
+    )
+    .forEach(
+      btn =>
+        btn.classList.remove(
+          "active"
+        )
+    );
+
+
+  if(button){
+
+    button.classList.add(
+      "active"
+    );
+
+  }
+
+
+  renderFarmHistory();
+
+}
+
+
+/* =========================================================
+   HISTORY FARM FILTER
+   ========================================================= */
+
+function updateHistoryFarmFilter(){
+
+  const select =
+    document.getElementById(
+      "historyFarmFilter"
+    );
+
+  if(!select) return;
+
+
+  const current =
+    select.value || "all";
+
+  const farms =
+    getFarms();
+
+
+  select.innerHTML = `
+
+    <option value="all">
+      All Farms
+    </option>
+
+    ${
+      farms.map(
+        farm => `
+
+          <option value="${farm.id}">
+            ${escapeFarmText(farm.name)}
+          </option>
+
+        `
+      ).join("")
+    }
+
+  `;
+
+
+  if(
+    farms.some(
+      farm =>
+        farm.id === current
+    )
+  ){
+
+    select.value =
+      current;
+
+  }else{
+
+    select.value =
+      "all";
+
+  }
+
+}
+
+
+/* =========================================================
+   HISTORY STATS
+   ========================================================= */
+
+function updateHistoryStats(){
+
+  const farms =
+    getFarms();
+
+  const history =
+    getHistory();
+
+
+  const cropSet =
+    new Set();
+
+
+  farms.forEach(
+    farm => {
+
+      if(farm.crop){
+        cropSet.add(
+          farm.crop.toLowerCase()
+        );
+      }
+
+    }
+  );
+
+
+  const farmCount =
+    document.getElementById(
+      "historyFarmCount"
+    );
+
+  const activityCount =
+    document.getElementById(
+      "historyActivityCount"
+    );
+
+  const cropCount =
+    document.getElementById(
+      "historyCropCount"
+    );
+
+
+  if(farmCount)
+    farmCount.innerText =
+      farms.length;
+
+  if(activityCount)
+    activityCount.innerText =
+      history.length;
+
+  if(cropCount)
+    cropCount.innerText =
+      cropSet.size;
+
+}
+
+
+/* =========================================================
+   CLEAR HISTORY
+   ========================================================= */
+
+function clearFarmHistory(){
+
+  const history =
+    getHistory();
+
+  if(!history.length){
+
+    alert(
+      "Farm history is already empty."
+    );
+
+    return;
+
+  }
+
+
+  const confirmed =
+    confirm(
+      "Clear all farm activity history?\n\n" +
+      "Your farm data will not be deleted."
+    );
+
+
+  if(!confirmed)
+    return;
+
+
+  localStorage.removeItem(
+    HISTORY_STORAGE_KEY
+  );
+
+
+  renderFarmHistory();
+
+}
+
+
+/* =========================================================
+   HELPERS
+   ========================================================= */
+
+function getStageEmoji(stage){
+
+  const map = {
+
+    "Seedling":"🌱",
+
+    "Vegetative":"🌿",
+
+    "Flowering":"🌸",
+
+    "Fruiting":"🍅",
+
+    "Harvesting":"🧺"
+
+  };
+
+
+  return (
+    map[stage] ||
+    "🌱"
+  );
+
+}
+
+
+function getHistoryIcon(type){
+
+  const icons = {
+
+    crop:"🌱",
+
+    irrigation:"💧",
+
+    fertilizer:"🧪",
+
+    farm:"🌾",
+
+    weather:"🌦️",
+
+    mandi:"💰",
+
+    system:"📋"
+
+  };
+
+
+  return (
+    icons[type] ||
+    "📋"
+  );
+
+}
+
+
+function escapeFarmText(text){
+
+  return String(text || "")
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#039;");
+
+}
+
+
+/* =========================================================
+   INITIALIZE FARM SYSTEM
+   ========================================================= */
+
+function initializeFarmSystem(){
+
+  const farms =
+    getFarms();
+
+
+  /*
+   * Create initial history once.
+   * This makes the History page useful
+   * immediately instead of appearing empty.
+   */
+
+  if(
+    getHistory().length === 0 &&
+    farms.length
+  ){
+
+    const active =
+      getActiveFarm();
+
+
+    addFarmHistory(
+      "farm",
+      "Farm profile loaded",
+      `${active.name} is ready for farm management.`,
+      active.id
+    );
+
+    addFarmHistory(
+      "crop",
+      "Crop registered",
+      `${active.crop} • ${active.area} acres • ${active.stage} stage.`,
+      active.id
+    );
+
+    addFarmHistory(
+      "irrigation",
+      "Irrigation advisory",
+      "Rain is expected tomorrow. Review irrigation before watering.",
+      active.id
+    );
+
+    addFarmHistory(
+      "fertilizer",
+      "Fertilizer plan available",
+      "Review the fertilizer schedule for the current crop stage.",
+      active.id
+    );
+
+  }
+
+
+  renderFarmPage();
+
+  renderFarmHistory();
+
+}
+
+
+/*
+ * Wait until the page is ready.
+ */
+
+if(
+  document.readyState === "loading"
+){
+
+  document.addEventListener(
+    "DOMContentLoaded",
+    initializeFarmSystem
+  );
+
+}else{
+
+  initializeFarmSystem();
+
+}
+
+/* =========================================================
+   KISANIQ - FARM BASED FERTILIZER + MANDI ENGINE
+   Uses the currently active farm
+   UI / UX remains unchanged
+   ========================================================= */
+
+
+/* =========================================================
+   CROP CONFIGURATION
+   ========================================================= */
+
+const KISANIQ_CROP_DATA = {
+
+  tomato: {
+
+    emoji: "🍅",
+
+    fertilizer: {
+
+      Seedling: {
+        nutrient: "Balanced NPK",
+        product: "NPK 19:19:19",
+        rate: "4–5 kg/acre",
+        timing: "Apply in small split doses",
+        reason:
+          "Young tomato plants need balanced nutrients for healthy root and leaf development."
+      },
+
+      Vegetative: {
+        nutrient: "Nitrogen + balanced NPK",
+        product: "NPK 19:19:19",
+        rate: "8–10 kg/acre",
+        timing: "Apply in split doses",
+        reason:
+          "Vegetative tomato plants need balanced nutrition for canopy and stem development."
+      },
+
+      Flowering: {
+        nutrient: "High Potassium",
+        product: "Potash (MOP)",
+        rate: "25 kg/acre",
+        timing: "Apply in 2 days",
+        reason:
+          "Flowering tomatoes need additional potassium to support flowering and fruit set."
+      },
+
+      Fruiting: {
+        nutrient: "Potassium + Calcium",
+        product: "Potash + Calcium",
+        rate: "20 kg/acre + foliar calcium",
+        timing: "Apply according to crop response",
+        reason:
+          "Fruiting plants benefit from potassium for fruit development and calcium for fruit quality."
+      },
+
+      Harvesting: {
+        nutrient: "Maintenance nutrition",
+        product: "Potassium-rich fertilizer",
+        rate: "10–15 kg/acre",
+        timing: "Use only if required",
+        reason:
+          "Avoid excessive nitrogen close to harvest and maintain balanced crop nutrition."
+      }
+
+    },
+
+    yield: 200,
+
+    mandis: [
+
+      {
+        name: "Kalyani Mandi",
+        distance: 12,
+        price: 29,
+        trend: 8,
+        status: "rising"
+      },
+
+      {
+        name: "Kolkata Mandi",
+        distance: 32,
+        price: 27,
+        trend: 0,
+        status: "stable"
+      },
+
+      {
+        name: "Nearby Mandi",
+        distance: 18,
+        price: 23,
+        trend: -5,
+        status: "falling"
+      }
+
+    ]
+
+  },
+
+
+  rice: {
+
+    emoji: "🌾",
+
+    fertilizer: {
+
+      Seedling: {
+        nutrient: "Balanced starter nutrition",
+        product: "NPK 20:20:20",
+        rate: "5–7 kg/acre",
+        timing: "Early crop stage",
+        reason:
+          "Young rice plants need balanced nutrition for strong establishment."
+      },
+
+      Vegetative: {
+        nutrient: "Nitrogen",
+        product: "Urea",
+        rate: "25–30 kg/acre",
+        timing: "Apply in split doses",
+        reason:
+          "Rice requires nitrogen during vegetative growth for healthy tillers and leaf development."
+      },
+
+      Flowering: {
+        nutrient: "Potassium",
+        product: "MOP",
+        rate: "20 kg/acre",
+        timing: "Apply during panicle development",
+        reason:
+          "Potassium supports panicle development, grain filling and crop strength."
+      },
+
+      Fruiting: {
+        nutrient: "Potassium",
+        product: "MOP",
+        rate: "15–20 kg/acre",
+        timing: "Apply during grain filling",
+        reason:
+          "Rice grain filling benefits from adequate potassium availability."
+      },
+
+      Harvesting: {
+        nutrient: "Maintenance",
+        product: "No heavy nitrogen application",
+        rate: "As required",
+        timing: "Near harvest",
+        reason:
+          "Avoid unnecessary nitrogen close to harvest."
+      }
+
+    },
+
+    yield: 450,
+
+    mandis: [
+
+      {
+        name: "Kalyani Rice Market",
+        distance: 14,
+        price: 24,
+        trend: 6,
+        status: "rising"
+      },
+
+      {
+        name: "Burdwan Mandi",
+        distance: 48,
+        price: 26,
+        trend: 3,
+        status: "rising"
+      },
+
+      {
+        name: "Nearby Mandi",
+        distance: 18,
+        price: 22,
+        trend: 0,
+        status: "stable"
+      }
+
+    ]
+
+  },
+
+
+  potato: {
+
+    emoji: "🥔",
+
+    fertilizer: {
+
+      Seedling: {
+        nutrient: "Balanced NPK",
+        product: "NPK 19:19:19",
+        rate: "8–10 kg/acre",
+        timing: "Early growth",
+        reason:
+          "Balanced nutrition supports early potato plant establishment."
+      },
+
+      Vegetative: {
+        nutrient: "Nitrogen + Potassium",
+        product: "NPK + MOP",
+        rate: "20 kg/acre",
+        timing: "Split application",
+        reason:
+          "Potato plants require adequate nitrogen and potassium for vigorous growth and tuber formation."
+      },
+
+      Flowering: {
+        nutrient: "Potassium",
+        product: "MOP",
+        rate: "20–25 kg/acre",
+        timing: "During tuber initiation",
+        reason:
+          "Potassium supports tuber development and crop quality."
+      },
+
+      Fruiting: {
+        nutrient: "Potassium",
+        product: "MOP",
+        rate: "20 kg/acre",
+        timing: "During tuber bulking",
+        reason:
+          "Potassium is important for tuber size and quality."
+      },
+
+      Harvesting: {
+        nutrient: "Maintenance",
+        product: "Avoid heavy nitrogen",
+        rate: "As required",
+        timing: "Near harvest",
+        reason:
+          "Excess nitrogen near harvest can delay maturity."
+      }
+
+    },
+
+    yield: 350,
+
+    mandis: [
+
+      {
+        name: "Kalyani Mandi",
+        distance: 12,
+        price: 22,
+        trend: 7,
+        status: "rising"
+      },
+
+      {
+        name: "Kolkata Mandi",
+        distance: 32,
+        price: 21,
+        trend: 2,
+        status: "stable"
+      },
+
+      {
+        name: "Nearby Mandi",
+        distance: 18,
+        price: 19,
+        trend: -3,
+        status: "falling"
+      }
+
+    ]
+
+  },
+
+
+  onion: {
+
+    emoji: "🧅",
+
+    fertilizer: {
+
+      Seedling: {
+        nutrient: "Balanced NPK",
+        product: "NPK 19:19:19",
+        rate: "5–7 kg/acre",
+        timing: "Early growth",
+        reason:
+          "Balanced nutrition supports root establishment."
+      },
+
+      Vegetative: {
+        nutrient: "Nitrogen + Potassium",
+        product: "NPK 19:19:19",
+        rate: "10–12 kg/acre",
+        timing: "Split application",
+        reason:
+          "Vegetative onions require balanced nutrition for leaf and bulb development."
+      },
+
+      Flowering: {
+        nutrient: "Potassium",
+        product: "MOP",
+        rate: "15–20 kg/acre",
+        timing: "During bulb development",
+        reason:
+          "Potassium supports bulb development and quality."
+      },
+
+      Fruiting: {
+        nutrient: "Potassium",
+        product: "MOP",
+        rate: "15 kg/acre",
+        timing: "During bulb filling",
+        reason:
+          "Adequate potassium supports bulb size and storage quality."
+      },
+
+      Harvesting: {
+        nutrient: "Low nitrogen",
+        product: "No heavy nitrogen",
+        rate: "As required",
+        timing: "Near harvest",
+        reason:
+          "Avoid excessive nitrogen near maturity."
+      }
+
+    },
+
+    yield: 250,
+
+    mandis: [
+
+      {
+        name: "Kalyani Mandi",
+        distance: 12,
+        price: 28,
+        trend: 5,
+        status: "rising"
+      },
+
+      {
+        name: "Kolkata Mandi",
+        distance: 32,
+        price: 30,
+        trend: 8,
+        status: "rising"
+      },
+
+      {
+        name: "Nearby Mandi",
+        distance: 18,
+        price: 25,
+        trend: -2,
+        status: "falling"
+      }
+
+    ]
+
+  },
+
+
+  wheat: {
+
+    emoji: "🌾",
+
+    fertilizer: {
+
+      Seedling: {
+        nutrient: "Phosphorus + balanced NPK",
+        product: "DAP",
+        rate: "40–50 kg/acre",
+        timing: "Basal application",
+        reason:
+          "Phosphorus supports strong root development during establishment."
+      },
+
+      Vegetative: {
+        nutrient: "Nitrogen",
+        product: "Urea",
+        rate: "25–30 kg/acre",
+        timing: "Top dressing",
+        reason:
+          "Nitrogen supports tillering and vegetative growth."
+      },
+
+      Flowering: {
+        nutrient: "Balanced nutrition",
+        product: "Potassium-rich fertilizer",
+        rate: "10–15 kg/acre",
+        timing: "According to soil condition",
+        reason:
+          "Adequate nutrition supports grain formation."
+      },
+
+      Fruiting: {
+        nutrient: "Potassium",
+        product: "MOP",
+        rate: "10–15 kg/acre",
+        timing: "During grain filling",
+        reason:
+          "Potassium supports grain filling and crop strength."
+      },
+
+      Harvesting: {
+        nutrient: "Maintenance",
+        product: "No heavy nitrogen",
+        rate: "As required",
+        timing: "Near harvest",
+        reason:
+          "Avoid excessive late nitrogen close to harvest."
+      }
+
+    },
+
+    yield: 350,
+
+    mandis: [
+
+      {
+        name: "Kalyani Grain Market",
+        distance: 15,
+        price: 27,
+        trend: 4,
+        status: "rising"
+      },
+
+      {
+        name: "Kolkata Grain Mandi",
+        distance: 34,
+        price: 29,
+        trend: 5,
+        status: "rising"
+      },
+
+      {
+        name: "Nearby Mandi",
+        distance: 18,
+        price: 25,
+        trend: 0,
+        status: "stable"
+      }
+
+    ]
+
+  }
+
+};
+
+
+/* =========================================================
+   GET CROP DATA
+   ========================================================= */
+
+function getKisanIQCropData(crop){
+
+  const key =
+    String(crop || "")
+      .trim()
+      .toLowerCase();
+
+  return (
+    KISANIQ_CROP_DATA[key] ||
+    KISANIQ_CROP_DATA.tomato
+  );
+
+}
+
+
+/* =========================================================
+   GET STAGE DATA
+   ========================================================= */
+
+function getKisanIQStageData(
+  cropData,
+  stage
+){
+
+  const stages =
+    cropData.fertilizer;
+
+  return (
+    stages[stage] ||
+    stages.Flowering ||
+    stages.Vegetative ||
+    Object.values(stages)[0]
+  );
+
+}
+
+
+/* =========================================================
+   FERTILIZER PAGE
+   ========================================================= */
+
+function renderFarmBasedFertilizer(){
+
+  const header =
+    document.getElementById(
+      "fertilizerFarmHeader"
+    );
+
+  const plan =
+    document.getElementById(
+      "fertilizerPlan"
+    );
+
+  const recommendation =
+    document.getElementById(
+      "fertilizerRecommendation"
+    );
+
+
+  if(
+    !header ||
+    !plan ||
+    !recommendation
+  ){
+
+    return;
+
+  }
+
+
+  const farm =
+    typeof getActiveFarm === "function"
+      ? getActiveFarm()
+      : null;
+
+
+  if(!farm){
+
+    header.innerHTML = `
+
+      <div style="
+        font-size:13px;
+        font-weight:700;
+      ">
+        🌱 No Active Farm
+      </div>
+
+      <div style="
+        font-size:10px;
+        color:var(--st);
+        margin-top:4px;
+      ">
+        Add a farm to get personalized fertilizer advice.
+      </div>
+
+    `;
+
+    plan.innerHTML = "";
+
+    recommendation.innerHTML = `
+      <div class="rci">🌾</div>
+
+      <div class="rctt">
+        Add Your Farm
+      </div>
+
+      <div class="rctx">
+        KisanIQ will recommend fertilizer according to
+        your crop, growth stage and farm area.
+      </div>
+    `;
+
+    return;
+
+  }
+
+
+  const cropData =
+    getKisanIQCropData(
+      farm.crop
+    );
+
+
+  const stageData =
+    getKisanIQStageData(
+      cropData,
+      farm.stage
+    );
+
+
+  const area =
+    Number(farm.area) || 0;
+
+
+  /* Calculate total requirement */
+
+  const totalRate =
+    calculateFertilizerAmount(
+      stageData.rate,
+      area
+    );
+
+
+  header.innerHTML = `
+
+    <div style="
+      display:flex;
+      align-items:center;
+      gap:10px;
+    ">
+
+      <div style="
+        font-size:32px;
+      ">
+        ${cropData.emoji}
+      </div>
+
+      <div>
+
+        <div style="
+          font-size:14px;
+          font-weight:700;
+        ">
+          ${escapeFarmText(farm.crop)}
+        </div>
+
+        <div style="
+          font-size:11px;
+          color:var(--st);
+        ">
+          ${getStageEmoji(farm.stage)}
+          ${escapeFarmText(farm.stage)} Stage
+          • ${escapeFarmText(farm.area)} acres
+        </div>
+
+      </div>
+
+    </div>
+
+  `;
+
+
+  plan.innerHTML = `
+
+    <div class="fti an">
+
+      <div class="ftd dn">
+        ✓
+      </div>
+
+      <div class="ftf">
+
+        <div class="ftw">
+          Farm Analysis
+        </div>
+
+        <div class="ftt">
+          ${escapeFarmText(stageData.nutrient)}
+        </div>
+
+        <div class="ftds">
+          ${escapeFarmText(farm.crop)}
+          •
+          ${escapeFarmText(farm.stage)}
+          •
+          ${escapeFarmText(farm.area)} acres
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <div class="fti an d1">
+
+      <div class="ftd pd">
+        🧪
+      </div>
+
+      <div class="ftf">
+
+        <div class="ftw">
+          Recommended Fertilizer
+        </div>
+
+        <div class="ftt">
+          ${escapeFarmText(stageData.product)}
+        </div>
+
+        <div class="ftds">
+          ${escapeFarmText(stageData.rate)}
+          ${
+            totalRate
+              ? ` • Approx. ${escapeFarmText(totalRate)} for your farm`
+              : ""
+          }
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <div class="fti an d2">
+
+      <div class="ftd fu">
+        📅
+      </div>
+
+      <div class="ftf">
+
+        <div class="ftw">
+          Application Timing
+        </div>
+
+        <div class="ftt">
+          ${escapeFarmText(stageData.timing)}
+        </div>
+
+        <div class="ftds">
+          Based on current ${escapeFarmText(farm.stage).toLowerCase()} stage
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <div class="fti an d3">
+
+      <div class="ftd fu">
+        🌱
+      </div>
+
+      <div class="ftf">
+
+        <div class="ftw">
+          Crop Response
+        </div>
+
+        <div class="ftt">
+          Monitor crop after application
+        </div>
+
+        <div class="ftds">
+          Re-check plant health and nutrient response next week
+        </div>
+
+      </div>
+
+    </div>
+
+  `;
+
+
+  recommendation.innerHTML = `
+
+    <div class="rci">
+      💡
+    </div>
+
+    <div class="rctt">
+      KisanIQ Recommendation
+    </div>
+
+    <div class="rctx">
+
+      <strong>
+        ${escapeFarmText(stageData.product)}
+      </strong>
+      is suggested for your
+      <strong>
+        ${escapeFarmText(farm.crop)}
+      </strong>
+      during the
+      <strong>
+        ${escapeFarmText(farm.stage).toLowerCase()}
+      </strong>
+      stage.
+
+      <br><br>
+
+      ${escapeFarmText(stageData.reason)}
+
+      <br><br>
+
+      <strong>
+        Farm size:
+      </strong>
+      ${escapeFarmText(farm.area)} acres
+
+      <br>
+
+      <strong>
+        Location:
+      </strong>
+      ${escapeFarmText(farm.location)}
+
+    </div>
+
+  `;
+
+}
+
+
+/* =========================================================
+   FERTILIZER QUANTITY CALCULATOR
+   ========================================================= */
+
+function calculateFertilizerAmount(
+  rateText,
+  area
+){
+
+  if(
+    !rateText ||
+    !area ||
+    area <= 0
+  ){
+
+    return "";
+
+  }
+
+
+  /*
+   * Extract the first numeric value.
+   * Example:
+   * "25 kg/acre" → 25
+   * "8–10 kg/acre" → 8
+   */
+
+  const match =
+    String(rateText)
+      .match(/(\d+(?:\.\d+)?)/);
+
+
+  if(!match)
+    return "";
+
+
+  const rate =
+    Number(match[1]);
+
+
+  if(!rate)
+    return "";
+
+
+  const total =
+    rate * area;
+
+
+  return Number.isInteger(total)
+    ? total + " kg"
+    : total.toFixed(1) + " kg";
+
+}
+
+
+/* =========================================================
+   MANDI PAGE
+   ========================================================= */
+
+function renderFarmBasedMandi(){
+
+  const header =
+    document.getElementById(
+      "mandiFarmHeader"
+    );
+
+  const results =
+    document.getElementById(
+      "mandiResults"
+    );
+
+  const estimate =
+    document.getElementById(
+      "mandiEstimatedSale"
+    );
+
+
+  if(
+    !header ||
+    !results ||
+    !estimate
+  ){
+
+    return;
+
+  }
+
+
+  const farm =
+    typeof getActiveFarm === "function"
+      ? getActiveFarm()
+      : null;
+
+
+  if(!farm){
+
+    header.innerHTML = `
+
+      <span style="font-size:24px">
+        🌾
+      </span>
+
+      <div>
+
+        <div style="
+          font-size:14px;
+          font-weight:700;
+        ">
+          No Active Farm
+        </div>
+
+        <div style="
+          font-size:11px;
+          color:var(--st);
+        ">
+          Add a farm to see selling recommendations.
+        </div>
+
+      </div>
+
+    `;
+
+    results.innerHTML = "";
+
+    estimate.innerHTML = `
+      <div class="estl">
+        Your Estimated Sale
+      </div>
+
+      <div class="estx">
+        Add a farm to calculate the estimated sale.
+      </div>
+    `;
+
+    return;
+
+  }
+
+
+  const cropData =
+    getKisanIQCropData(
+      farm.crop
+    );
+
+
+  const mandis =
+    [...cropData.mandis];
+
+
+  /*
+   * Sort by:
+   * 1. Price
+   * 2. Price trend
+   * 3. Distance
+   */
+
+  mandis.sort(
+    (a,b) => {
+
+      const scoreA =
+        a.price * 1.0 +
+        a.trend * 0.15 -
+        a.distance * 0.03;
+
+      const scoreB =
+        b.price * 1.0 +
+        b.trend * 0.15 -
+        b.distance * 0.03;
+
+      return scoreB - scoreA;
+
+    }
+  );
+
+
+  const best =
+    mandis[0];
+
+
+  const averagePrice =
+    mandis.reduce(
+      (sum,item) =>
+        sum + item.price,
+      0
+    ) / mandis.length;
+
+
+  header.innerHTML = `
+
+    <span style="
+      font-size:24px;
+    ">
+      ${cropData.emoji}
+    </span>
+
+    <div>
+
+      <div style="
+        font-size:14px;
+        font-weight:700;
+      ">
+        ${escapeFarmText(farm.crop)}
+      </div>
+
+      <div style="
+        font-size:11px;
+        color:var(--st);
+      ">
+        Farm: ${escapeFarmText(farm.area)} acres
+        • ${escapeFarmText(farm.location)}
+      </div>
+
+      <div style="
+        font-size:10px;
+        color:var(--st);
+        margin-top:2px;
+      ">
+        Average: ₹${averagePrice.toFixed(0)}/kg
+      </div>
+
+    </div>
+
+  `;
+
+
+  results.innerHTML =
+
+    mandis.map(
+      (mandi,index) => {
+
+        const isBest =
+          mandi === best;
+
+
+        let rankClass = "b";
+
+        if(index === 0)
+          rankClass = "g";
+
+        else if(index === 1)
+          rankClass = "s";
+
+
+        let trendHTML = "";
+
+        if(mandi.trend > 0){
+
+          trendHTML = `
+            <span class="tu">
+              ↑ ${mandi.trend}%
+            </span>
+          `;
+
+        }else if(mandi.trend < 0){
+
+          trendHTML = `
+            <span class="td">
+              ↓ ${Math.abs(mandi.trend)}%
+            </span>
+          `;
+
+        }else{
+
+          trendHTML = `
+            <span class="ts">
+              Stable
+            </span>
+          `;
+
+        }
+
+
+        return `
+
+          <div class="mdc an ${index === 1 ? "d1" : index === 2 ? "d2" : ""}">
+
+            <div class="mdr ${rankClass}">
+              ${
+                index === 0
+                  ? "🥇"
+                  : index + 1
+              }
+            </div>
+
+            <div class="mdi">
+
+              <div class="mdn">
+                ${escapeFarmText(mandi.name)}
+              </div>
+
+              <div class="mdd">
+                ${escapeFarmText(String(mandi.distance))}
+                km away
+              </div>
+
+            </div>
+
+            <div class="mdp">
+
+              <div class="mdpv">
+                ₹${mandi.price}/kg
+              </div>
+
+              <div class="mdpt">
+                ${trendHTML}
+              </div>
+
+            </div>
+
+          </div>
+
+          ${
+            isBest
+            ?
+            `
+              <div class="best-tag">
+                <span>
+                  BEST OPTION
+                </span>
+              </div>
+            `
+            :
+            ""
+          }
+
+        `;
+
+      }
+    ).join("");
+
+
+  /*
+   * Estimate harvest quantity from:
+   *
+   * Farm area × crop's demo yield factor
+   *
+   * This is intentionally an estimate,
+   * not a guaranteed production forecast.
+   */
+
+  const estimatedQuantity =
+    Math.round(
+      Number(farm.area) *
+      Number(cropData.yield)
+    );
+
+
+  const estimatedSale =
+    estimatedQuantity *
+    best.price;
+
+
+  estimate.innerHTML = `
+
+    <div class="estl">
+      Your Estimated Sale
+    </div>
+
+    <div class="estv">
+      ₹${formatIndianNumber(estimatedSale)}
+    </div>
+
+    <div class="estx">
+
+      Approx. ${formatIndianNumber(estimatedQuantity)} kg ×
+      ₹${best.price}/kg at
+      ${escapeFarmText(best.name)}
+
+      <br>
+
+      ${escapeFarmText(farm.area)} acres of
+      ${escapeFarmText(farm.crop)}
+
+    </div>
+
+  `;
+
+}
+
+
+/* =========================================================
+   INDIAN NUMBER FORMAT
+   ========================================================= */
+
+function formatIndianNumber(number){
+
+  const value =
+    Number(number) || 0;
+
+
+  return value.toLocaleString(
+    "en-IN"
+  );
+
+}
+
+
+/* =========================================================
+   REFRESH FARM BASED RECOMMENDATIONS
+   ========================================================= */
+
+function refreshFarmRecommendations(){
+
+  renderFarmBasedFertilizer();
+
+  renderFarmBasedMandi();
+
+}
+
+
+/* =========================================================
+   INITIALIZATION
+   ========================================================= */
+
+function initializeFarmRecommendations(){
+
+  /*
+   * Initial render
+   */
+
+  refreshFarmRecommendations();
+
+
+  /*
+   * When user opens pages using
+   * the existing radio navigation,
+   * refresh recommendations.
+   */
+
+  document
+    .querySelectorAll(
+      'input[name="pg"]'
+    )
+    .forEach(
+      radio => {
+
+        radio.addEventListener(
+          "change",
+          function(){
+
+            if(
+              this.id === "p-fertilizer" ||
+              this.id === "p-mandi"
+            ){
+
+              refreshFarmRecommendations();
+
+            }
+
+          }
+        );
+
+      }
+    );
+
+}
+
+
+/*
+ * Start after DOM is ready.
+ */
+
+if(
+  document.readyState === "loading"
+){
+
+  document.addEventListener(
+    "DOMContentLoaded",
+    initializeFarmRecommendations
+  );
+
+}else{
+
+  initializeFarmRecommendations();
+
+}
+
+</script>
+
+</div>
+<script>
+/* =========================================================
+   KISANIQ AUTH + LAUNCH CONTROLLER
+   ========================================================= */
+
+const KQ_AUTH_API =
+  "http://localhost:3000/api/auth";
+
+
+let kqAuthMode = "login";
+
+let kqCurrentUser = null;
+
+
+/* =========================================================
+   LAUNCH
+   ========================================================= */
+
+function startKQLaunch(){
+
+  document.body.classList.add(
+    "kq-auth-locked"
+  );
+
+
+  const status =
+    document.getElementById(
+      "kqLaunchStatus"
+    );
+
+
+  const messages = [
+
+    "Preparing your farm intelligence...",
+
+    "Loading smart agriculture tools...",
+
+    "Syncing your KisanIQ experience...",
+
+    "Almost ready..."
+
+  ];
+
+
+  let index = 0;
+
+
+  const interval =
+    setInterval(
+      () => {
+
+        if(status){
+
+          status.innerText =
+            messages[index];
+
+        }
+
+        index++;
+
+        if(
+          index >= messages.length
+        ){
+
+          clearInterval(interval);
+
+        }
+
+      },
+      570
+    );
+
+
+  setTimeout(
+    () => {
+
+      const launch =
+        document.getElementById(
+          "kqLaunchScreen"
+        );
+
+
+      if(launch){
+
+        launch.classList.add(
+          "kq-launch-hide"
+        );
+
+      }
+
+
+      checkKQSession();
+
+    },
+    2450
+  );
+
+}
+
+
+/* =========================================================
+   SESSION CHECK
+   ========================================================= */
+
+async function checkKQSession(){
+
+  try{
+
+    const token =
+  sessionStorage.getItem(
+    "KQ_AUTH_TOKEN"
+  );
+
+
+const response =
+  await fetch(
+    KQ_AUTH_API + "/me",
+    {
+      method:"GET",
+
+      headers:{
+        "Authorization":
+          token
+            ? "Bearer " + token
+            : ""
+      }
+    }
+  );
+
+
+    if(!response.ok){
+
+      showKQLogin();
+
+      return;
+
+    }
+
+
+    const data =
+      await response.json();
+
+
+    if(
+      data &&
+      data.user
+    ){
+
+      kqCurrentUser =
+  data.user;
+
+if(data.token){
+
+  sessionStorage.setItem(
+    "KQ_AUTH_TOKEN",
+    data.token
+  );
+
+}
+
+      showKQApp();
+
+    }else{
+
+      showKQLogin();
+
+    }
+
+  }catch(error){
+
+    /*
+     * Backend unavailable:
+     * show login rather than silently
+     * pretending authentication succeeded.
+     */
+
+    console.error(
+      "KisanIQ auth server:",
+      error
+    );
+
+    showKQLogin();
+
+  }
+
+}
+
+
+/* =========================================================
+   SHOW LOGIN
+   ========================================================= */
+
+function showKQLogin(){
+
+  document.body.classList.add(
+    "kq-auth-locked"
+  );
+
+
+  document
+    .getElementById(
+      "kqAuthScreen"
+    )
+    .classList.add(
+      "kq-auth-show"
+    );
+
+}
+
+
+/* =========================================================
+   SHOW APP
+   ========================================================= */
+
+function showKQApp(){
+
+  const auth =
+    document.getElementById(
+      "kqAuthScreen"
+    );
+
+
+  if(auth){
+
+    auth.classList.remove(
+      "kq-auth-show"
+    );
+
+  }
+
+
+  document.body.classList.remove(
+    "kq-auth-locked"
+  );
+
+
+  updateKQUserUI();
+
+}
+
+
+/* =========================================================
+   AUTH MODE
+   ========================================================= */
+
+function toggleKQAuthMode(){
+
+  kqAuthMode =
+    kqAuthMode === "login"
+      ? "signup"
+      : "login";
+
+
+  const signup =
+    kqAuthMode === "signup";
+
+
+  document.getElementById(
+    "kqAuthTitle"
+  ).innerText =
+    signup
+      ? "Create your account 🌱"
+      : "Welcome back 👋";
+
+
+  document.getElementById(
+    "kqAuthDescription"
+  ).innerText =
+    signup
+      ? "Create your KisanIQ account and start managing your farm smarter."
+      : "Sign in to continue to your personalized farm dashboard.";
+
+
+  document.getElementById(
+    "kqNameField"
+  ).style.display =
+    signup
+      ? "block"
+      : "none";
+
+
+  document.getElementById(
+    "kqConfirmField"
+  ).style.display =
+    signup
+      ? "block"
+      : "none";
+
+
+  document.getElementById(
+    "kqAuthButton"
+  ).innerText =
+    signup
+      ? "Create Account"
+      : "Sign In";
+
+
+  document.getElementById(
+    "kqSwitchText"
+  ).innerText =
+    signup
+      ? "Already have an account?"
+      : "New to KisanIQ?";
+
+
+  document.getElementById(
+    "kqSwitchButton"
+  ).innerText =
+    signup
+      ? "Sign in"
+      : "Create account";
+
+
+  document.getElementById(
+    "kqPasswordInput"
+  ).value = "";
+
+
+  document.getElementById(
+    "kqConfirmInput"
+  ).value = "";
+
+
+  clearKQAuthMessage();
+
+}
+
+
+/* =========================================================
+   PASSWORD VISIBILITY
+   ========================================================= */
+
+function toggleKQPassword(){
+
+  const input =
+    document.getElementById(
+      "kqPasswordInput"
+    );
+
+
+  if(
+    input.type === "password"
+  ){
+
+    input.type = "text";
+
+  }else{
+
+    input.type = "password";
+
+  }
+
+}
+
+
+/* =========================================================
+   AUTH MESSAGE
+   ========================================================= */
+
+function showKQAuthMessage(
+  message,
+  type = "error"
+){
+
+  const box =
+    document.getElementById(
+      "kqAuthMessage"
+    );
+
+
+  box.innerText =
+    message;
+
+
+  box.className =
+    "kq-auth-message show " +
+    type;
+
+}
+
+
+function clearKQAuthMessage(){
+
+  const box =
+    document.getElementById(
+      "kqAuthMessage"
+    );
+
+
+  box.innerText = "";
+
+  box.className =
+    "kq-auth-message";
+
+}
+
+
+/* =========================================================
+   SUBMIT LOGIN / SIGNUP
+   ========================================================= */
+
+async function submitKQAuth(){
+
+  clearKQAuthMessage();
+
+
+  const name =
+    document.getElementById(
+      "kqNameInput"
+    ).value.trim();
+
+
+  const email =
+    document.getElementById(
+      "kqEmailInput"
+    ).value.trim()
+    .toLowerCase();
+
+
+  const password =
+    document.getElementById(
+      "kqPasswordInput"
+    ).value;
+
+
+  const confirmPassword =
+    document.getElementById(
+      "kqConfirmInput"
+    ).value;
+
+
+  const button =
+    document.getElementById(
+      "kqAuthButton"
+    );
+
+
+  if(
+    !email ||
+    !email.includes("@")
+  ){
+
+    showKQAuthMessage(
+      "Please enter a valid email address."
+    );
+
+    return;
+
+  }
+
+
+  if(
+    password.length < 8
+  ){
+
+    showKQAuthMessage(
+      "Password must contain at least 8 characters."
+    );
+
+    return;
+
+  }
+
+
+  if(
+    kqAuthMode === "signup"
+  ){
+
+    if(!name){
+
+      showKQAuthMessage(
+        "Please enter your name."
+      );
+
+      return;
+
+    }
+
+
+    if(
+      password !== confirmPassword
+    ){
+
+      showKQAuthMessage(
+        "Passwords do not match."
+      );
+
+      return;
+
+    }
+
+  }
+
+
+  button.disabled = true;
+
+  button.innerText =
+    kqAuthMode === "signup"
+      ? "Creating account..."
+      : "Signing in...";
+
+
+  try{
+
+    const endpoint =
+      kqAuthMode === "signup"
+        ? "/register"
+        : "/login";
+
+
+    const payload =
+      kqAuthMode === "signup"
+        ? {
+            name,
+            email,
+            password
+          }
+        : {
+            email,
+            password
+          };
+
+
+    const response =
+      await fetch(
+        KQ_AUTH_API + endpoint,
+        {
+          method:"POST",
+
+          credentials:"include",
+
+          headers:{
+            "Content-Type":
+              "application/json"
+          },
+
+          body:
+            JSON.stringify(payload)
+        }
+      );
+
+
+    const data =
+      await response.json();
+
+
+    if(!response.ok){
+
+      throw new Error(
+        data.error ||
+        "Authentication failed."
+      );
+
+    }
+
+
+    kqCurrentUser =
+      data.user;
+
+
+    showKQAuthMessage(
+      kqAuthMode === "signup"
+        ? "Account created successfully."
+        : "Signed in successfully.",
+      "success"
+    );
+
+
+    setTimeout(
+      () => {
+
+        showKQApp();
+
+      },
+      450
+    );
+
+
+  }catch(error){
+
+    console.error(error);
+
+
+    showKQAuthMessage(
+      error.message ||
+      "Unable to connect to KisanIQ."
+    );
+
+
+  }finally{
+
+    button.disabled = false;
+
+    button.innerText =
+      kqAuthMode === "signup"
+        ? "Create Account"
+        : "Sign In";
+
+  }
+
+}
+
+
+/* =========================================================
+   USER UI
+   ========================================================= */
+
+function updateKQUserUI(){
+
+  if(!kqCurrentUser)
+    return;
+
+
+  const name =
+    kqCurrentUser.name ||
+    "KisanIQ User";
+
+
+  const email =
+    kqCurrentUser.email ||
+    "";
+
+
+  const initial =
+    name
+      .trim()
+      .charAt(0)
+      .toUpperCase();
+
+
+  const avatar =
+    document.getElementById(
+      "kqHomeAvatar"
+    );
+
+
+  if(avatar)
+    avatar.innerText =
+      initial;
+
+
+  const homeName =
+    document.getElementById(
+      "kqHomeUserName"
+    );
+
+
+  if(homeName)
+    homeName.innerText =
+      name;
+
+
+  const profileAvatar =
+    document.getElementById(
+      "kqProfileAvatar"
+    );
+
+
+  if(profileAvatar)
+    profileAvatar.innerText =
+      initial;
+
+
+  const profileName =
+    document.getElementById(
+      "kqProfileName"
+    );
+
+
+  if(profileName)
+    profileName.innerText =
+      name;
+
+
+  const profileEmail =
+    document.getElementById(
+      "kqProfileEmail"
+    );
+
+
+  if(profileEmail)
+    profileEmail.innerText =
+      email;
+
+}
+
+
+/* =========================================================
+   PROFILE
+   ========================================================= */
+
+function openKQProfile(){
+
+  updateKQUserUI();
+
+
+  document
+    .getElementById(
+      "kqProfileModal"
+    )
+    .classList.add(
+      "show"
+    );
+
+}
+
+
+function closeKQProfile(){
+
+  document
+    .getElementById(
+      "kqProfileModal"
+    )
+    .classList.remove(
+      "show"
+    );
+
+}
+
+
+function closeKQProfileOutside(event){
+
+  if(
+    event.target.id ===
+    "kqProfileModal"
+  ){
+
+    closeKQProfile();
+
+  }
+
+}
+
+
+/* =========================================================
+   ABOUT / CONTACT / PRIVACY / TERMS
+   ========================================================= */
+
+function openKQInfo(section){
+
+  const modal =
+    document.getElementById(
+      "kqInfoModal"
+    );
+
+
+  const icon =
+    document.getElementById(
+      "kqInfoIcon"
+    );
+
+
+  const title =
+    document.getElementById(
+      "kqInfoTitle"
+    );
+
+
+  const content =
+    document.getElementById(
+      "kqInfoContent"
+    );
+
+
+  const pages = {
+
+    about: {
+
+      icon:"🌱",
+
+      title:"About KisanIQ",
+
+      html:`
+
+        <div class="kq-info-section">
+
+          <h4>
+            Smart farming. Better decisions.
+          </h4>
+
+          <p>
+            KisanIQ is an agricultural
+            decision-support platform designed
+            to help farmers understand their
+            farm conditions and make more
+            informed decisions.
+          </p>
+
+        </div>
+
+        <div class="kq-info-section">
+
+          <h4>
+            What KisanIQ provides
+          </h4>
+
+          <p>
+            Farm management, crop health
+            assistance, weather information,
+            irrigation guidance, fertilizer
+            planning, mandi recommendations,
+            AI assistance and voice interaction.
+          </p>
+
+        </div>
+
+        <div class="kq-info-section">
+
+          <h4>
+            Important
+          </h4>
+
+          <p>
+            KisanIQ provides decision-support
+            information. Recommendations should
+            be evaluated against local soil
+            conditions, crop conditions,
+            government advisories and qualified
+            agricultural professionals.
+          </p>
+
+        </div>
+
+      `
+
+    },
+
+
+    contact: {
+
+      icon:"📞",
+
+      title:"Contact & Support",
+
+      html:`
+
+        <div class="kq-info-section">
+
+          <h4>
+            Need help?
+          </h4>
+
+          <p>
+            For account, technical or
+            agricultural-support questions,
+            contact the KisanIQ support team.
+          </p>
+
+        </div>
+
+        <div class="kq-info-section">
+
+          <h4>
+            Support email
+          </h4>
+
+          <p>
+            REPLACE_WITH_YOUR_SUPPORT_EMAIL
+          </p>
+
+        </div>
+
+        <div class="kq-info-section">
+
+          <h4>
+            Support information
+          </h4>
+
+          <p>
+            When reporting a technical problem,
+            include the app version, device,
+            approximate time of the issue and
+            the steps that caused the problem.
+            Never send your password.
+          </p>
+
+        </div>
+
+      `
+
+    },
+
+
+    privacy: {
+
+      icon:"🔒",
+
+      title:"Privacy Policy",
+
+      html:`
+
+        <div class="kq-info-section">
+
+          <h4>
+            Information we may process
+          </h4>
+
+          <p>
+            KisanIQ may process account
+            information such as name and email,
+            farm information entered by you,
+            crop information and information
+            required to provide requested
+            features.
+          </p>
+
+        </div>
+
+        <div class="kq-info-section">
+
+          <h4>
+            How information is used
+          </h4>
+
+          <p>
+            Information is used to provide,
+            personalize and improve KisanIQ
+            services, maintain account access,
+            provide requested AI features and
+            support the operation of the platform.
+          </p>
+
+        </div>
+
+        <div class="kq-info-section">
+
+          <h4>
+            AI processing
+          </h4>
+
+          <p>
+            Questions and crop images submitted
+            to AI features may be transmitted to
+            the configured AI service for
+            processing. Do not submit passwords,
+            financial credentials or other
+            unnecessary sensitive information.
+          </p>
+
+        </div>
+
+        <div class="kq-info-section">
+
+          <h4>
+            Your choices
+          </h4>
+
+          <p>
+            You may request account deletion
+            through the account controls or by
+            contacting support.
+          </p>
+
+        </div>
+
+      `
+
+    },
+
+
+    terms: {
+
+      icon:"📜",
+
+      title:"Terms of Service",
+
+      html:`
+
+        <div class="kq-info-section">
+
+          <h4>
+            Use of KisanIQ
+          </h4>
+
+          <p>
+            KisanIQ is provided as an agricultural
+            decision-support service. You are
+            responsible for evaluating information
+            before applying it to your farm.
+          </p>
+
+        </div>
+
+        <div class="kq-info-section">
+
+          <h4>
+            No guarantee of outcomes
+          </h4>
+
+          <p>
+            Weather, crop disease, fertilizer,
+            yield and market recommendations
+            depend on changing conditions.
+            KisanIQ does not guarantee crop
+            yield, market price, profit or
+            agricultural outcome.
+          </p>
+
+        </div>
+
+        <div class="kq-info-section">
+
+          <h4>
+            User responsibility
+          </h4>
+
+          <p>
+            Do not rely solely on automated
+            recommendations for pesticide,
+            fertilizer, irrigation or other
+            agricultural decisions where
+            professional or label guidance is
+            required.
+          </p>
+
+        </div>
+
+        <div class="kq-info-section">
+
+          <h4>
+            Copyright
+          </h4>
+
+          <p>
+            © 2026 KisanIQ. All rights reserved.
+            The KisanIQ name, interface,
+            software, original content and
+            branding are protected to the extent
+            provided by applicable law.
+          </p>
+
+        </div>
+
+      `
+
+    }
+
+  };
+
+
+  const page =
+    pages[section] ||
+    pages.about;
+
+
+  icon.innerText =
+    page.icon;
+
+
+  title.innerText =
+    page.title;
+
+
+  content.innerHTML =
+    page.html;
+
+
+  modal.classList.add(
+    "show"
+  );
+
+}
+
+
+function closeKQInfo(){
+
+  document
+    .getElementById(
+      "kqInfoModal"
+    )
+    .classList.remove(
+      "show"
+    );
+
+}
+
+
+function closeKQInfoOutside(event){
+
+  if(
+    event.target.id ===
+    "kqInfoModal"
+  ){
+
+    closeKQInfo();
+
+  }
+
+}
+
+
+/* =========================================================
+   LOGOUT
+   ========================================================= */
+
+async function logoutKQ(){
+
+  try{
+
+    await fetch(
+      KQ_AUTH_API + "/logout",
+      {
+        method:"POST",
+        credentials:"include"
+      }
+    );
+
+    }catch(error){
+
+    console.error(error);
+
+  }
+
+
+  sessionStorage.removeItem(
+    "KQ_AUTH_TOKEN"
+  );
+
+  kqCurrentUser = null;
+
+
+  closeKQProfile();
+
+
+  document.body.classList.add(
+    "kq-auth-locked"
+  );
+
+
+  showKQLogin();
+
+
+  document.getElementById(
+    "kqEmailInput"
+  ).value = "";
+
+
+  document.getElementById(
+    "kqPasswordInput"
+  ).value = "";
+
+}
+
+
+/* =========================================================
+   ACCOUNT DELETION
+   ========================================================= */
+
+async function deleteKQAccount(){
+
+  const confirmed =
+    confirm(
+      "Delete your KisanIQ account?\n\n" +
+      "This action cannot be undone."
+    );
+
+
+  if(!confirmed)
+    return;
+
+
+  try{
+
+    const token =
+  sessionStorage.getItem(
+    "KQ_AUTH_TOKEN"
+  );
+
+const response =
+  await fetch(
+    KQ_AUTH_API + "/delete",
+    {
+      method:"DELETE",
+
+      headers:{
+        "Authorization":
+          token
+            ? "Bearer " + token
+            : ""
+      }
+    }
+  );
+
+
+    const data =
+      await response.json();
+
+
+    if(!response.ok){
+
+      throw new Error(
+        data.error ||
+        "Unable to delete account."
+      );
+
+    }
+
+
+    alert(
+      "Your KisanIQ account has been deleted."
+    );
+
+    sessionStorage.removeItem(
+     "KQ_AUTH_TOKEN"
+    );
+
+    kqCurrentUser = null;
+
+    closeKQProfile();
+
+    showKQLogin();
+
+
+  }catch(error){
+
+    alert(
+      error.message ||
+      "Unable to delete account."
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   START
+   ========================================================= */
+
+window.addEventListener(
+  "load",
+  () => {
+
+    startKQLaunch();
+
+  }
+);
+
+</script>
+</body>
+</html>
