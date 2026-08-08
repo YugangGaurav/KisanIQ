@@ -6112,13 +6112,8 @@ function getKisanIQCropData(crop){
       .trim()
       .toLowerCase();
 
-  return (
-    KISANIQ_CROP_DATA[key] ||
-    KISANIQ_CROP_DATA.tomato
-  );
-
+  return KISANIQ_CROP_DATA[key] || null;
 }
-
 
 /* =========================================================
    GET STAGE DATA
@@ -6146,7 +6141,7 @@ function getKisanIQStageData(
    FERTILIZER PAGE
    ========================================================= */
 
-function renderFarmBasedFertilizer(){
+async function renderFarmBasedFertilizer(){
 
   const header =
     document.getElementById(
@@ -6221,18 +6216,225 @@ function renderFarmBasedFertilizer(){
 
   }
 
+const aiData =
+  await getKisanIQFertilizerRecommendation();
 
   const cropData =
-    getKisanIQCropData(
-      farm.crop
-    );
+  getKisanIQCropData(
+    farm.crop
+  );
+
+if(!cropData){
+
+  header.innerHTML = `
+    <div style="
+      display:flex;
+      align-items:center;
+      gap:10px;
+    ">
+
+      <div style="font-size:32px">
+        🌱
+      </div>
+
+      <div>
+
+        <div style="
+          font-size:14px;
+          font-weight:700;
+        ">
+          ${escapeFarmText(farm.crop)}
+        </div>
+
+        <div style="
+          font-size:11px;
+          color:var(--st);
+        ">
+          ${getStageEmoji(farm.stage)}
+          ${escapeFarmText(farm.stage)}
+          Stage
+          •
+          ${escapeFarmText(farm.area)}
+          acres
+        </div>
+
+      </div>
+
+    </div>
+  `;
 
 
-  const stageData =
-    getKisanIQStageData(
-      cropData,
-      farm.stage
-    );
+  if(aiData){
+
+    plan.innerHTML = `
+
+      <div class="fti an">
+
+        <div class="ftd dn">
+          ✓
+        </div>
+
+        <div class="ftf">
+
+          <div class="ftw">
+            Farm Analysis
+          </div>
+
+          <div class="ftt">
+            ${escapeFarmText(
+              aiData.fertilizer?.nutrient ||
+              "Crop-specific nutrition"
+            )}
+          </div>
+
+          <div class="ftds">
+            ${escapeFarmText(farm.crop)}
+            •
+            ${escapeFarmText(farm.stage)}
+            •
+            ${escapeFarmText(farm.area)}
+            acres
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <div class="fti an d1">
+
+        <div class="ftd pd">
+          🧪
+        </div>
+
+        <div class="ftf">
+
+          <div class="ftw">
+            Recommended Fertilizer
+          </div>
+
+          <div class="ftt">
+            ${escapeFarmText(
+              aiData.fertilizer?.product ||
+              "See crop-specific recommendation"
+            )}
+          </div>
+
+          <div class="ftds">
+            ${escapeFarmText(
+              aiData.fertilizer?.rate ||
+              "Use soil-test-based guidance"
+            )}
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <div class="fti an d2">
+
+        <div class="ftd fu">
+          📅
+        </div>
+
+        <div class="ftf">
+
+          <div class="ftw">
+            Application Timing
+          </div>
+
+          <div class="ftt">
+            ${escapeFarmText(
+              aiData.fertilizer?.timing ||
+              farm.stage
+            )}
+          </div>
+
+          <div class="ftds">
+            Based on current
+            ${escapeFarmText(
+              farm.stage
+            ).toLowerCase()}
+            stage
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <div class="fti an d3">
+
+        <div class="ftd fu">
+          🌱
+        </div>
+
+        <div class="ftf">
+
+          <div class="ftw">
+            Irrigation
+          </div>
+
+          <div class="ftt">
+            ${escapeFarmText(
+              aiData.irrigation?.method ||
+              "Crop-specific irrigation"
+            )}
+          </div>
+
+          <div class="ftds">
+            ${escapeFarmText(
+              aiData.irrigation?.schedule ||
+              "Maintain appropriate soil moisture."
+            )}
+          </div>
+
+        </div>
+
+      </div>
+
+    `;
+
+  }else{
+
+    plan.innerHTML = "";
+
+  }
+
+
+  recommendation.innerHTML = `
+
+    <div class="rci">
+      💡
+    </div>
+
+    <div class="rctt">
+      KisanIQ Recommendation
+    </div>
+
+    <div class="rctx">
+
+      ${
+        aiData?.recommendation
+          ? escapeFarmText(
+              aiData.recommendation
+            ).replace(/\n/g, "<br>")
+          : "Preparing a crop-specific recommendation..."
+      }
+
+    </div>
+
+  `;
+
+  return;
+}
+
+const stageData =
+  getKisanIQStageData(
+    cropData,
+    farm.stage
+  );
 
 
   const area =
@@ -6302,7 +6504,10 @@ function renderFarmBasedFertilizer(){
         </div>
 
         <div class="ftt">
-          ${escapeFarmText(stageData.nutrient)}
+          ${escapeFarmText(
+  	    aiData?.fertilizer?.nutrient ||
+  	    stageData.nutrient
+	  )}
         </div>
 
         <div class="ftds">
@@ -6331,11 +6536,17 @@ function renderFarmBasedFertilizer(){
         </div>
 
         <div class="ftt">
-          ${escapeFarmText(stageData.product)}
+          ${escapeFarmText(
+  	    aiData?.fertilizer?.product ||
+  	    stageData.product
+	  )}
         </div>
 
         <div class="ftds">
-          ${escapeFarmText(stageData.rate)}
+          ${escapeFarmText(
+  	  aiData?.fertilizer?.rate ||
+  	  stageData.rate
+	 )}
           ${
             totalRate
               ? ` • Approx. ${escapeFarmText(totalRate)} for your farm`
@@ -6361,7 +6572,10 @@ function renderFarmBasedFertilizer(){
         </div>
 
         <div class="ftt">
-          ${escapeFarmText(stageData.timing)}
+          ${escapeFarmText(
+  	   aiData?.fertilizer?.timing ||
+  	   stageData.timing
+	  )}
         </div>
 
         <div class="ftds">
@@ -6401,54 +6615,115 @@ function renderFarmBasedFertilizer(){
 
 
   recommendation.innerHTML = `
+  <div class="rci">💡</div>
 
-    <div class="rci">
-      💡
-    </div>
+  <div class="rctt">
+    KisanIQ Recommendation
+  </div>
 
-    <div class="rctt">
-      KisanIQ Recommendation
-    </div>
-
-    <div class="rctx">
-
-      <strong>
-        ${escapeFarmText(stageData.product)}
-      </strong>
-      is suggested for your
+  <div class="rctx">
+    <div style="color:var(--st);font-size:12px;">
+      Preparing a crop-specific recommendation
+      for
       <strong>
         ${escapeFarmText(farm.crop)}
-      </strong>
-      during the
-      <strong>
-        ${escapeFarmText(farm.stage).toLowerCase()}
-      </strong>
-      stage.
-
-      <br><br>
-
-      ${escapeFarmText(stageData.reason)}
-
-      <br><br>
-
-      <strong>
-        Farm size:
-      </strong>
-      ${escapeFarmText(farm.area)} acres
-
-      <br>
-
-      <strong>
-        Location:
-      </strong>
-      ${escapeFarmText(farm.location)}
-
+      </strong>...
     </div>
+  </div>
+`;
 
-  `;
+getKisanIQFertilizerRecommendation()
+  .then(data => {
+
+    if(!data || !data.recommendation){
+      return;
+    }
+
+    const formatted =
+      escapeFarmText(
+        data.recommendation
+      ).replace(
+        /\n/g,
+        "<br>"
+      );
+
+    recommendation.innerHTML = `
+      <div class="rci">💡</div>
+
+      <div class="rctt">
+        KisanIQ Recommendation
+      </div>
+
+      <div class="rctx">
+        ${formatted}
+      </div>
+    `;
+
+  })
+  .catch(error => {
+
+    console.error(
+      "KisanIQ recommendation:",
+      error
+    );
+
+  });
 
 }
 
+async function getKisanIQFertilizerRecommendation(){
+
+  const farm =
+    typeof getActiveFarm === "function"
+      ? getActiveFarm()
+      : null;
+
+  if(!farm){
+    return null;
+  }
+
+  try{
+
+    const response = await fetch(
+      "https://kisaniq.onrender.com/api/fertilizer-recommendation",
+      {
+        method: "POST",
+
+        headers: {
+          "Content-Type": "application/json"
+        },
+
+        body: JSON.stringify({
+          crop: farm.crop,
+          stage: farm.stage,
+          area: farm.area,
+          location: farm.location
+        })
+      }
+    );
+
+    const data =
+      await response.json();
+
+    if(!response.ok){
+      throw new Error(
+        data?.error ||
+        "Recommendation request failed"
+      );
+    }
+
+    return data;
+
+  }catch(error){
+
+    console.error(
+      "KisanIQ fertilizer recommendation error:",
+      error
+    );
+
+    return null;
+  }
+}
 
 /* =========================================================
    FERTILIZER QUANTITY CALCULATOR

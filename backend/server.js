@@ -44,7 +44,9 @@ function cleanAIText(text) {
     .trim();
 }
 
-dotenv.config();
+dotenv.config({
+  path: require("path").join(__dirname, ".env")
+});
 
 const app = express();
 
@@ -696,7 +698,7 @@ ${question}
 `;
 
     const response = await ai.models.generateContent({
-      model: "gemini-3.6-flash",
+      model: "gemini-3.5-flash-lite",
       contents: prompt
     });
 
@@ -787,7 +789,7 @@ Formatting rules:
 
     const response = await ai.models.generateContent({
 
-      model: "gemini-3.6-flash",
+      model: "gemini-3.5-flash-lite",
 
       contents: [
 
@@ -838,6 +840,398 @@ Formatting rules:
 
 });
 
+// =========================================================
+// KISANIQ ACTIVE CROP RECOMMENDATION
+// Uses the currently active farm only.
+// No crop-specific hardcoding or fallback.
+// =========================================================
+
+app.post("/api/fertilizer-recommendation", async (req, res) => {
+
+  try {
+
+    const {
+      crop,
+      stage,
+      area,
+      location
+    } = req.body || {};
+
+    if (!crop) {
+      return res.status(400).json({
+        success: false,
+        error: "Active crop is required."
+      });
+    }
+
+    const activeCrop =
+      String(crop).trim();
+
+    const activeStage =
+      String(stage || "Current growth stage").trim();
+
+    const farmArea =
+      Number(area) > 0
+        ? Number(area)
+        : null;
+
+    const farmLocation =
+      String(location || "India").trim();
+
+
+    const prompt = `
+You are KisanIQ, an agricultural advisory assistant
+for farmers in India.
+
+Analyze ONLY the farmer's currently active crop.
+
+ACTIVE FARM DETAILS
+
+Crop: ${activeCrop}
+Growth stage: ${activeStage}
+Farm size: ${farmArea ? farmArea + " acres" : "Not provided"}
+Location: ${farmLocation}
+
+
+IMPORTANT CROP RULE
+
+The farmer's active crop is:
+
+"${activeCrop}"
+
+You MUST provide advice specifically for this crop in concise form.
+
+NEVER substitute another crop.
+
+NEVER use a generic recommendation when crop-specific
+information is available.
+
+The crop name supplied by the farmer is the source of truth.
+
+
+RESEARCH
+
+Use Google Search grounding to verify agricultural
+information before answering.
+
+Prioritize reliable sources such as:
+
+- ICAR
+- Indian agricultural universities
+- Krishi Vigyan Kendras
+- Government agriculture departments
+- Agricultural research institutions
+
+Prefer information relevant to India and, when possible,
+the farmer's location.
+
+
+FERTILIZER
+
+Determine what nutrients/fertilizer are appropriate for:
+
+Crop: ${activeCrop}
+Stage: ${activeStage}
+
+Consider the current growth stage.
+
+Do NOT invent fertilizer quantities.
+
+If an exact quantity depends on soil test results,
+soil type, previous fertilizer application, or other
+missing information, clearly say that the exact dose
+should be based on a soil test or local agricultural
+recommendation.
+
+Do not present an uncertain quantity as a fact.
+
+
+IRRIGATION
+
+Give irrigation advice specifically for:
+
+Crop: ${activeCrop}
+Stage: ${activeStage}
+
+Include:
+
+- suitable irrigation method
+- practical watering guidance
+- maintaining appropriate soil moisture
+- avoiding over-irrigation or waterlogging
+- considerations for rainfall when relevant
+
+Do not invent today's rainfall or weather conditions.
+
+
+FARM SIZE
+
+Use the farm size only when it is appropriate to explain
+how the recommendation scales.
+
+Do not calculate an exact fertilizer quantity unless the
+source supports that calculation.
+
+
+LOCATION
+
+Use the location to improve regional relevance.
+
+Do not invent local weather conditions.
+
+
+STYLE
+
+Write like a practical agricultural advisor.
+
+Do NOT mention:
+
+- AI
+- Gemini
+- Google Search
+- prompts
+- models
+- web searches
+- "as an AI"
+
+Do not sound like hidden AI instructions.
+
+Keep the recommendation concise and understandable
+for a farmer.
+
+
+RETURN EXACTLY THIS FORMAT:
+
+RECOMMENDATION:
+Give 2-4 concise sentences specific to the active crop
+and current growth stage.
+
+FERTILIZER:
+Give the suitable nutrient/fertilizer for the active crop.
+Give an exact rate only when supported by reliable
+agricultural information. Otherwise state that the exact
+rate should be based on soil testing.
+
+APPLICATION TIMING:
+Explain when/how it should be applied at the current stage.
+
+IRRIGATION:
+Give the suitable irrigation method and practical
+watering guidance for the active crop and stage.
+
+WHY:
+Briefly explain the agricultural reason.
+
+CAUTION:
+Give one important caution, or write "None".
+
+SOURCE:
+Name the authoritative agricultural source(s) used.
+`;
+
+
+const response =
+  await ai.models.generateContent({
+
+    model: "gemini-3.5-flash-lite",
+
+    contents: prompt
+
+  });
+
+
+    const recommendation =
+      cleanAIText(
+        response.text || ""
+      );
+
+const aiText = recommendation || "";
+
+function extractSection(name, nextNames = []) {
+
+  const escapedName =
+    name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+  const nextPattern =
+    nextNames.length
+      ? nextNames
+          .map(n =>
+            n.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+          )
+          .join("|")
+      : "$";
+
+  const regex = new RegExp(
+    "^\\s*" +
+    escapedName +
+    "\\s*:\\s*" +
+    "([\\s\\S]*?)" +
+    "(?=^\\s*(?:" +
+    nextPattern +
+    ")\\s*:|$)",
+    "im"
+  );
+
+  const match =
+    aiText.match(regex);
+
+  return match
+    ? match[1].trim()
+    : "";
+}
+
+const fertilizerText =
+  extractSection(
+    "FERTILIZER",
+    [
+      "APPLICATION TIMING",
+      "IRRIGATION",
+      "WHY",
+      "CAUTION",
+      "SOURCE"
+    ]
+  );
+
+const timingText =
+  extractSection(
+    "APPLICATION TIMING",
+    [
+      "IRRIGATION",
+      "WHY",
+      "CAUTION",
+      "SOURCE"
+    ]
+  );
+
+const irrigationText =
+  extractSection(
+    "IRRIGATION",
+    [
+      "WHY",
+      "CAUTION",
+      "SOURCE"
+    ]
+  );
+
+const fertilizerLines =
+  fertilizerText
+    .split(/\n+/)
+    .map(x => x.trim())
+    .filter(Boolean);
+
+const fertilizerProduct =
+  fertilizerLines[0] ||
+  "Crop-specific fertilizer recommendation";
+
+const fertilizerRate =
+  fertilizerLines.slice(1).join(" ") ||
+  "Follow soil-test-based guidance";
+
+
+    if (!recommendation) {
+
+      return res.status(500).json({
+
+        success: false,
+
+        error:
+          "No agricultural recommendation was generated."
+
+      });
+
+    }
+
+
+    // ---------------------------------------------
+    // Collect Google Search grounding sources
+    // ---------------------------------------------
+
+    const sources = [];
+
+    const chunks =
+      response
+        ?.candidates?.[0]
+        ?.groundingMetadata
+        ?.groundingChunks || [];
+
+
+    for (const chunk of chunks) {
+
+      if (chunk?.web?.uri) {
+
+        sources.push({
+
+          title:
+            chunk.web.title ||
+            "Agricultural source",
+
+          url:
+            chunk.web.uri
+
+        });
+
+      }
+
+    }
+
+
+    return res.json({
+  success: true,
+  crop: activeCrop,
+  stage: activeStage,
+
+  recommendation,
+
+  fertilizer: {
+  nutrient:
+    fertilizerProduct,
+
+  product:
+    fertilizerProduct,
+
+  rate:
+    fertilizerRate,
+
+  timing:
+    timingText ||
+    activeStage
+},
+
+irrigation: {
+  method:
+    irrigationText ||
+    "Crop-specific irrigation",
+
+  schedule:
+    irrigationText ||
+    "Maintain appropriate soil moisture."
+},
+
+  sources: sources.slice(0, 5)
+});
+
+
+  } catch (error) {
+
+    console.error(
+      "KisanIQ active crop recommendation error:",
+      error
+    );
+
+
+    return res.status(500).json({
+
+      success: false,
+
+      error:
+        error.message ||
+        "Unable to generate crop recommendation."
+
+    });
+
+  }
+
+});
 app.get("/", (req, res) => {
   res.sendFile(
     path.join(__dirname, "index.html")
