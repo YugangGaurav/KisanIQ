@@ -3008,7 +3008,7 @@ body.kq-auth-locked{
 
 
 <script>
-const KISANIQ_API = "http://localhost:3000/api/ask";
+const KISANIQ_API = "http://https://kisaniq.onrender.com/api/ask";
 
 const kisanInput = document.getElementById("kisanInput");
 const kisanChat = document.getElementById("kisanChat");
@@ -3677,7 +3677,7 @@ kisanInput.addEventListener("keydown", function(event){
 
 <script>
 
-const KISANIQ_VOICE_API = "http://localhost:3000/api/ask";
+const KISANIQ_VOICE_API = "http://https://kisaniq.onrender.com/api/ask";
 
 let kisanRecognition = null;
 let isListening = false;
@@ -3992,7 +3992,7 @@ async function analyzeCropImage(event) {
 
 
     const response = await fetch(
-      "http://localhost:3000/api/analyze-crop",
+      "http://https://kisaniq.onrender.com/api/analyze-crop",
       {
         method: "POST",
 
@@ -6936,7 +6936,7 @@ if(
    ========================================================= */
 
 const KQ_AUTH_API =
-  "http://localhost:3000/api/auth";
+  "http://https://kisaniq.onrender.com/api/auth";
 
 
 let kqAuthMode = "login";
