@@ -605,10 +605,10 @@ Farmers often need to search through multiple sources to understand crop problem
 </p>
 
 <pre>
-       IMAGE
-         │
-         ▼
-     Crop Doctor
+   Crop Image
+        │
+        ▼
+    Crop Doctor
          │
          ├──────────────┐
          ▼              ▼
@@ -650,7 +650,7 @@ The long-term vision is to evolve KisanIQ from an AI assistant into a complete s
 <td>Backend / AI / Development</td>
 </tr>
 <tr>
-<td>Yugang Gaurav / Shreysh Shekhar</td>
+<td>Both Members</td>
 <td>Research / Presentation / Development</td>
 </tr>
 </table>
