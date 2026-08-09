@@ -628,11 +628,7 @@ The long-term vision is to evolve KisanIQ from an AI assistant into a complete s
 
 ---
 
-<h2>👥 Team</h2>
-
-<p>
-<strong>IMPORTANT:</strong> Replace the placeholders below with your actual team information before submitting.
-</p>
+<h2>👥 Team: Non-Player Character (NPC)</h2>
 
 <h2>Team Leader</h2>
 
@@ -646,20 +642,18 @@ The long-term vision is to evolve KisanIQ from an AI assistant into a complete s
 <th>Role</th>
 </tr>
 <tr>
-<td>YOUR TEAMMATE NAME</td>
+<td>Shreysh Shekhar</td>
 <td>Frontend / UI / Development</td>
 </tr>
 <tr>
-<td>YOUR TEAMMATE NAME</td>
+<td>Yugang Gaurav</td>
 <td>Backend / AI / Development</td>
 </tr>
 <tr>
-<td>YOUR TEAMMATE NAME</td>
+<td>Yugang Gaurav / Shreysh Shekhar</td>
 <td>Research / Presentation / Development</td>
 </tr>
 </table>
-
-<!-- Replace the names and roles above with your actual team members. Remove unused rows. -->
 
 ---
 
