@@ -393,44 +393,20 @@ Users should verify important crop-health, pesticide, fertilizer and farm-manage
 
 <h2>📸 Product Screenshots</h2>
 
-<p>
-<strong>IMPORTANT:</strong> Add screenshots of the actual working application in this section before submitting the hackathon project.
-</p>
-
 <h3>Screenshot 1 — KisanIQ Dashboard</h3>
 
-<p>
-📌 <strong>Where to add:</strong> Upload your dashboard screenshot to a folder named <code>screenshots</code> in the GitHub repository, then replace the placeholder below with the actual filename.
-</p>
-
-<!-- Replace the placeholder below after uploading your screenshot -->
 <img src="screenshots/dashboard.png" alt="KisanIQ Dashboard" width="900">
 
 <h3>Screenshot 2 — AI Crop Doctor / Camera Analysis</h3>
 
-<p>
-📌 <strong>Where to add:</strong> Upload the crop-analysis screenshot to the <code>screenshots</code> folder.
-</p>
-
-<!-- Replace the placeholder below after uploading your screenshot -->
 <img src="screenshots/crop-doctor.png" alt="KisanIQ AI Crop Doctor" width="900">
 
 <h3>Screenshot 3 — Voice Assistant</h3>
 
-<p>
-📌 <strong>Where to add:</strong> Upload the voice-assistant screenshot to the <code>screenshots</code> folder.
-</p>
-
-<!-- Replace the placeholder below after uploading your screenshot -->
 <img src="screenshots/voice-assistant.png" alt="KisanIQ Voice Assistant" width="900">
 
 <h3>Screenshot 4 — AI Agricultural Assistant</h3>
 
-<p>
-📌 <strong>Where to add:</strong> Upload the main AI assistant screenshot to the <code>screenshots</code> folder.
-</p>
-
-<!-- Replace the placeholder below after uploading your screenshot -->
 <img src="screenshots/ai-assistant.png" alt="KisanIQ AI Agricultural Assistant" width="900">
 
 ---
